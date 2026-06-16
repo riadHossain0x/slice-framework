@@ -30,15 +30,17 @@ services.AddSliceManagementStore(b => b.UseSqlite("Data Source=management.db"));
 | Type | Kind | Description |
 |---|---|---|
 | `SliceManagementDbContext` | `sealed class : SliceDbContext` | `DbSet`s: `PermissionGrants`, `Tenants`, `SettingValues`, `FeatureValues`. Tables `SlicePermissionGrants` / `SliceTenants` / `SliceSettingValues` / `SliceFeatureValues`, each with a unique index. |
-| `PermissionGrant` | `sealed class` (entity) | `Id`, `Name`, `ProviderName`, `ProviderKey`. |
-| `TenantRecord` | `sealed class` (entity) | `Id`, `Name` (unique). |
-| `SettingValueRecord` | `sealed class` (entity) | `Id`, `Name`, `Value?`, `ProviderName` (`"G"`/`"T"`/`"U"`), `ProviderKey?`. |
-| `FeatureValueRecord` | `sealed class` (entity) | `Id`, `Name`, `Value?`, `ProviderName` (`"G"`/`"T"`), `ProviderKey?`. |
+| `PermissionGrant` | `sealed class` (entity), `IHasExtraProperties` | `Id`, `Name`, `ProviderName`, `ProviderKey`, `ExtraProperties`. |
+| `TenantRecord` | `sealed class` (entity), `IHasExtraProperties` | `Id`, `Name` (unique), `ConnectionString?` (db-per-tenant; `null` ⇒ shared host DB), `ExtraProperties`. |
+| `SettingValueRecord` | `sealed class` (entity), `IHasExtraProperties` | `Id`, `Name`, `Value?`, `ProviderName` (`"G"`/`"T"`/`"U"`), `ProviderKey?`, `ExtraProperties`. |
+| `FeatureValueRecord` | `sealed class` (entity), `IHasExtraProperties` | `Id`, `Name`, `Value?`, `ProviderName` (`"G"`/`"T"`), `ProviderKey?`, `ExtraProperties`. |
 | `PermissionProviders` | `static class` | `Role = "R"`, `User = "U"`. |
 | `PermissionManagementStore` | `sealed class`, `IPermissionStore`, `IScopedDependency` | DB-backed grant check for current user + roles. |
 | `IPermissionGrantManager` / `PermissionGrantManager` | `interface` / `sealed class`, `IScopedDependency` | `GetGrantedAsync` / `GrantAsync` / `RevokeAsync`. |
 | `ITenantManager` / `TenantManager` | `interface` / `sealed class`, `IScopedDependency` | `CreateAsync(name, connectionString?)` / `GetListAsync` / `FindByNameAsync` / `FindByIdAsync` / `DeleteAsync`. |
 | `ManagementTenantConnectionStore` | `sealed class`, `ITenantConnectionStore` | Cached, registry-backed per-tenant connection strings for **database-per-tenant** (`AddSliceManagementTenantConnectionStore`). |
+| `ITenantDatabaseMigrator` / `TenantDatabaseMigrator<TContext>` | `interface` / `sealed class` | Applies EF migrations across the host DB + every registered tenant: `MigrateAllAsync()` (startup) and `MigrateTenantAsync(tenantId?)` (onboarding; `null` ⇒ host). See [multi-tenancy](../../docs/multitenancy.md#migrating-tenant-databases). |
+| `TenantDatabaseMigratorRegistration` | `static class` | `AddSliceTenantDatabaseMigrator<TContext>(this IServiceCollection)` — registers the migrator for the per-tenant context. |
 | `ManagementSettingValueProvider` | `sealed class`, `ISettingValueProvider`, `IScopedDependency` | `Order = -10`; resolves U → T → G. |
 | `ManagementFeatureStore` | `sealed class`, `IFeatureStore`, `IScopedDependency` | Resolves T → G → `Features:{name}` config. |
 | `PermissionManagementController` | `sealed class : SliceController` | `[Authorize]`, route `api/management/permissions`. |
@@ -76,6 +78,25 @@ await grants.GrantAsync(PermissionProviders.Role, "manager", "Crm.Leads.Create",
 var tenant = await tenants.CreateAsync("acme", connectionString: "Data Source=acme.db", ct);   // db-per-tenant
 ```
 
+Attach custom data to any management entity (schema-less — no migration needed):
+
+```csharp
+var tenant = await tenants.FindByNameAsync("acme", ct);
+tenant!.SetProperty("plan", "pro").SetProperty("isActive", true);
+await db.SaveChangesAsync(ct);                       // persisted to the ExtraProperties JSON column
+var plan = tenant.GetProperty<string>("plan");
+// server-side filter: db.Tenants.WhereExtraProperty("plan", "pro")
+```
+
+Migrate every tenant database (database-per-tenant) — register the migrator, then run it:
+
+```csharp
+services.AddSliceTenantDatabaseMigrator<TenantDbContext>();          // alongside AddSliceMultiTenantDbContext
+// ...
+await migrator.MigrateAllAsync(ct);                                  // host/default + every registered tenant
+await migrator.MigrateTenantAsync(tenant.Id, ct);                   // a single tenant (on onboarding)
+```
+
 ## Notes
 
 - **Immediate permission changes:** `PermissionManagementStore` grants a permission when there is a matching `PermissionGrant` for the current user (`ProviderName == "U"`, `ProviderKey == user id`) or for any of the user's roles (`ProviderName == "R"`, `ProviderKey == role name`). Because the check hits the database per request, grant/revoke changes apply without re-issuing tokens — unlike the claims store it replaces (registered earlier, so this scoped store wins).
@@ -84,3 +105,5 @@ var tenant = await tenants.CreateAsync("acme", connectionString: "Data Source=ac
 - **Setting precedence:** `ManagementSettingValueProvider` has `Order = -10` (highest priority, above global-override/config/default providers) and resolves user → tenant → global.
 - **Feature precedence:** `ManagementFeatureStore` resolves tenant → global → `configuration["Features:{name}"]`.
 - All managers and stores are scoped (`IScopedDependency`); the `DbContext` derives from `SliceDbContext` so multi-tenancy data filters and auditing apply. Management controllers are gated with `[Authorize]` (authentication required; add `[SlicePermission]` on the underlying operations to gate them further).
+- **Extra properties:** every management entity implements `IHasExtraProperties`, so `SliceDbContext` maps an `ExtraProperties` bag to a JSON column (`jsonb` on Npgsql, `TEXT` elsewhere) — apps can attach custom data (e.g. a tenant's plan/status) without changing the entity. Fresh databases get the column automatically; an already-deployed database needs an `ALTER TABLE … ADD COLUMN ExtraProperties` (or a migration) to add it.
+- **Migrating tenant databases:** for **database-per-tenant**, `ITenantDatabaseMigrator` applies EF migrations to the host DB and every tenant in `SliceTenants` (`MigrateAllAsync()` at startup, `MigrateTenantAsync(id)` on onboarding) — see [multi-tenancy → Migrating tenant databases](../../docs/multitenancy.md#migrating-tenant-databases).

@@ -1,4 +1,5 @@
 using Microsoft.EntityFrameworkCore;
+using Microsoft.EntityFrameworkCore.Design;
 using FluentValidation;
 using Slice.AspNetCore;
 using Slice.Core.Ambient;
@@ -9,6 +10,23 @@ using Slice.Modularity;
 using Slice.MultiTenancy;
 
 namespace Slice.Sample.MultiTenant;
+
+/// <summary>
+/// Design-time factory so <c>dotnet ef migrations add</c> can build <see cref="TenantDbContext"/>
+/// without booting the app or an ambient tenant. Migrations are generated against the host database;
+/// the ambient services passed here don't affect the generated schema (the tenant/soft-delete filters
+/// are runtime query expressions).
+/// </summary>
+public sealed class TenantDbContextDesignTimeFactory : IDesignTimeDbContextFactory<TenantDbContext>
+{
+    public TenantDbContext CreateDbContext(string[] args)
+    {
+        var options = new DbContextOptionsBuilder<TenantDbContext>()
+            .UseSqlite("Data Source=tenant-host.db")
+            .Options;
+        return new TenantDbContext(options, new NullCurrentTenant(), new DataFilter());
+    }
+}
 
 /// <summary>
 /// Database-per-tenant with the tenant→database map held in a <b>registry database</b> (not a
@@ -32,12 +50,16 @@ public sealed class TenantModule : SliceModule
         // The tenant registry (SliceTenants) is the source of truth for tenant→connection-string.
         services.AddSliceManagementStore(o => o.UseSqlite("Data Source=tenant-registry.db"));
         services.AddSliceManagementTenantConnectionStore();
+        services.AddScoped<ITenantManager, TenantManager>();   // tenant CRUD over the registry (this sample doesn't load the full management module)
 
         // The per-tenant data context — its connection string is resolved per request from the registry.
         services.AddSliceMultiTenantDbContext<TenantDbContext>(
             defaultConnectionString: "Data Source=tenant-host.db",
             configure: (options, connectionString) => options.UseSqlite(connectionString));
         services.AddScoped<IWidgetRepository, EfWidgetRepository>();
+
+        // Applies EF migrations to the host DB + every registered tenant DB (startup + onboarding).
+        services.AddSliceTenantDatabaseMigrator<TenantDbContext>();
 
         // This sample only uses the management tenant *registry*, not its HTTP API — drop the
         // management module's controllers so the only endpoints are /api/widgets and /api/tenants.
@@ -69,13 +91,9 @@ public sealed class TenantModule : SliceModule
             await registry.SaveChangesAsync();
         }
 
-        // Provision the host DB and each seeded tenant's dedicated DB (resolve the context under each).
-        var currentTenant = sp.GetRequiredService<ICurrentTenant>();
-        foreach (var tenantId in new Guid?[] { null, DemoTenants.TenantA, DemoTenants.TenantB })
-        {
-            using (currentTenant.Change(tenantId))
-            using (var scope = sp.CreateScope())
-                await scope.ServiceProvider.GetRequiredService<TenantDbContext>().Database.EnsureCreatedAsync();
-        }
+        // Provision/upgrade the host DB and every registered tenant's DB by applying EF migrations.
+        // (Replaces EnsureCreated: this writes __EFMigrationsHistory and evolves existing schemas.)
+        using (var scope = sp.CreateScope())
+            await scope.ServiceProvider.GetRequiredService<ITenantDatabaseMigrator>().MigrateAllAsync();
     }
 }

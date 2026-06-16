@@ -116,28 +116,23 @@ public sealed class OnboardTenantValidator : AbstractValidator<OnboardTenantComm
 }
 
 public sealed class OnboardTenantHandler(
-    SliceManagementDbContext registry,
+    ITenantManager tenants,
     ManagementTenantConnectionStore connectionStore,
-    IGuidGenerator guids,
-    ICurrentTenant currentTenant,
-    IServiceScopeFactory scopeFactory) : ICommandHandler<OnboardTenantCommand, Result<OnboardedTenant>>
+    ITenantDatabaseMigrator migrator,
+    IGuidGenerator guids) : ICommandHandler<OnboardTenantCommand, Result<OnboardedTenant>>
 {
     public async Task<Result<OnboardedTenant>> HandleAsync(OnboardTenantCommand command, CancellationToken ct)
     {
-        var id = guids.Create();
-        var connectionString = $"Data Source=tenant-{id:N}.db";
+        var connectionString = $"Data Source=tenant-{guids.Create():N}.db";   // unique file (not tied to the tenant id)
 
-        // 1) Register the tenant + its database in the registry (persist now so the store can read it).
-        registry.Tenants.Add(new TenantRecord { Id = id, Name = command.Name, ConnectionString = connectionString });
-        await registry.SaveChangesAsync(ct);
-        connectionStore.Invalidate(id);   // ensure the cache reloads this new tenant
+        // 1) Register the tenant + its database via the management API (persists to the SliceTenants registry).
+        var tenant = await tenants.CreateAsync(command.Name, connectionString, ct);
+        connectionStore.Invalidate(tenant.Id);   // ensure the resolver cache reloads this new tenant
 
-        // 2) Provision the tenant's dedicated database (resolve the context under the new tenant).
-        using (currentTenant.Change(id))
-        using (var scope = scopeFactory.CreateScope())
-            await scope.ServiceProvider.GetRequiredService<TenantDbContext>().Database.EnsureCreatedAsync(ct);
+        // 2) Provision the tenant's dedicated database by applying migrations to it.
+        await migrator.MigrateTenantAsync(tenant.Id, ct);
 
-        return Result<OnboardedTenant>.Success(new OnboardedTenant(id, connectionString));
+        return Result<OnboardedTenant>.Success(new OnboardedTenant(tenant.Id, connectionString));
     }
 }
 

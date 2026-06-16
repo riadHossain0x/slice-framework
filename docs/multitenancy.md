@@ -140,9 +140,50 @@ dictionary: tenants and their connection strings live in the `SliceTenants` tabl
 `TenantRecord.ConnectionString`), so tenants can be onboarded at runtime — see the
 [`Slice.Sample.MultiTenant`](../samples/Slice.Sample.MultiTenant/) sample's `POST /api/tenants`.
 
-> Each tenant's database needs its schema created/migrated. In the sample test, schema is ensured per
-> tenant by switching `ICurrentTenant.Change(tenantId)` and calling `EnsureCreatedAsync()` in that
-> scope. In production, run migrations per tenant connection.
+### Migrating tenant databases
+
+Each tenant's database needs its schema created and **kept up to date as the model changes**. Prefer EF
+**migrations** (`Database.MigrateAsync()`) over `EnsureCreatedAsync()`: migrations write
+`__EFMigrationsHistory` and evolve an existing schema, whereas `EnsureCreated` only creates a brand-new
+database once and never alters it.
+
+`Slice.Management` ships a reusable `ITenantDatabaseMigrator` that applies migrations across the
+host/default database **and** every tenant in the `SliceTenants` registry. Register it next to the
+multi-tenant context (it needs `AddSliceManagementStore` for the registry):
+
+```csharp
+services.AddSliceMultiTenantDbContext<TenantDbContext>(
+    defaultConnectionString: "Data Source=tenant-host.db",
+    configure: (options, cs) => options.UseSqlite(cs));
+services.AddSliceTenantDatabaseMigrator<TenantDbContext>();
+```
+
+Migrate every database on startup (host + all registered tenants), e.g. from a module's
+`OnApplicationInitializationAsync`:
+
+```csharp
+using var scope = context.ServiceProvider.CreateScope();
+await scope.ServiceProvider.GetRequiredService<ITenantDatabaseMigrator>().MigrateAllAsync();
+```
+
+…and provision a single tenant when onboarding it:
+
+```csharp
+var tenant = await tenants.CreateAsync(name, connectionString, ct);   // ITenantManager → SliceTenants
+connectionStore.Invalidate(tenant.Id);                                 // reload the resolver cache
+await migrator.MigrateTenantAsync(tenant.Id, ct);                      // create/upgrade that tenant's DB
+```
+
+Internally the migrator switches `ICurrentTenant.Change(tenantId)` and resolves `TContext` in a child
+scope, so the connection resolver hands it that tenant's connection string before
+`Database.MigrateAsync()` runs. Because `MigrateAllAsync()` walks the whole registry, a migration you add
+later is applied to **all** existing tenant databases on the next startup. The runnable
+[`Slice.Sample.MultiTenant`](../samples/Slice.Sample.MultiTenant/) sample uses exactly this (an
+`InitialCreate` migration, `MigrateAllAsync()` at startup, `MigrateTenantAsync(id)` in `POST /api/tenants`).
+
+> Generating migrations for a multi-tenant context: add an `IDesignTimeDbContextFactory<TContext>` that
+> builds the context against the host connection string, so `dotnet ef migrations add …` doesn't need a
+> running app or an ambient tenant. See the sample's `TenantDbContextDesignTimeFactory`.
 
 ### When to use which
 

@@ -1,0 +1,33 @@
+<Project Sdk="Microsoft.NET.Sdk">
+
+  <PropertyGroup>
+    <TargetFramework>net10.0</TargetFramework>
+    <ImplicitUsings>enable</ImplicitUsings>
+    <Nullable>enable</Nullable>
+    <IsPackable>false</IsPackable>
+  </PropertyGroup>
+
+  <ItemGroup>
+    <FrameworkReference Include="Microsoft.AspNetCore.App" />
+  </ItemGroup>
+
+  <ItemGroup>
+    <PackageReference Include="coverlet.collector" />
+    <PackageReference Include="Microsoft.NET.Test.Sdk" />
+    <PackageReference Include="xunit" />
+    <PackageReference Include="xunit.runner.visualstudio" />
+    <PackageReference Include="Microsoft.EntityFrameworkCore.Sqlite" />
+  </ItemGroup>
+
+  <ItemGroup>
+    <ProjectReference Include="..\..\src\Slice.AspNetCore.Hypermedia\Slice.AspNetCore.Hypermedia.csproj" />
+    <ProjectReference Include="..\..\src\Slice.AspNetCore.ConditionalRequests\Slice.AspNetCore.ConditionalRequests.csproj" />
+    <ProjectReference Include="..\..\src\Slice.AspNetCore.MinimalApi\Slice.AspNetCore.MinimalApi.csproj" />
+    <ProjectReference Include="..\..\src\Slice.Authorization\Slice.Authorization.csproj" />
+  </ItemGroup>
+
+  <ItemGroup>
+    <Using Include="Xunit" />
+  </ItemGroup>
+
+</Project>

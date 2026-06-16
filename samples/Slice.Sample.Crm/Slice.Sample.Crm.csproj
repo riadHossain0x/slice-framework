@@ -1,0 +1,45 @@
+<Project Sdk="Microsoft.NET.Sdk.Web">
+
+  <ItemGroup>
+    <ProjectReference Include="..\..\src\Slice.AspNetCore\Slice.AspNetCore.csproj" />
+    <ProjectReference Include="..\..\src\Slice.AspNetCore.Hypermedia\Slice.AspNetCore.Hypermedia.csproj" />
+    <ProjectReference Include="..\..\src\Slice.AspNetCore.ConditionalRequests\Slice.AspNetCore.ConditionalRequests.csproj" />
+    <ProjectReference Include="..\..\src\Slice.AspNetCore.MinimalApi\Slice.AspNetCore.MinimalApi.csproj" />
+    <ProjectReference Include="..\..\src\Slice.Application\Slice.Application.csproj" />
+    <ProjectReference Include="..\..\src\Slice.Domain\Slice.Domain.csproj" />
+    <ProjectReference Include="..\..\src\Slice.Mediator.Default\Slice.Mediator.Default.csproj" />
+    <ProjectReference Include="..\..\src\Slice.EntityFrameworkCore\Slice.EntityFrameworkCore.csproj" />
+    <ProjectReference Include="..\..\src\Slice.EventBus\Slice.EventBus.csproj" />
+    <ProjectReference Include="..\..\src\Slice.MultiTenancy\Slice.MultiTenancy.csproj" />
+    <ProjectReference Include="..\..\src\Slice.Authorization\Slice.Authorization.csproj" />
+    <ProjectReference Include="..\..\src\Slice.Authentication\Slice.Authentication.csproj" />
+    <ProjectReference Include="..\..\src\Slice.Settings\Slice.Settings.csproj" />
+    <ProjectReference Include="..\..\src\Slice.Localization\Slice.Localization.csproj" />
+    <ProjectReference Include="..\..\src\Slice.BackgroundJobs\Slice.BackgroundJobs.csproj" />
+    <ProjectReference Include="..\..\src\Slice.Caching\Slice.Caching.csproj" />
+    <ProjectReference Include="..\..\src\Slice.BlobStoring\Slice.BlobStoring.csproj" />
+    <ProjectReference Include="..\..\src\Slice.Emailing\Slice.Emailing.csproj" />
+    <ProjectReference Include="..\..\src\Slice.Features\Slice.Features.csproj" />
+    <ProjectReference Include="..\..\src\Slice.BackgroundWorkers\Slice.BackgroundWorkers.csproj" />
+    <ProjectReference Include="..\..\src\Slice.DistributedLocking\Slice.DistributedLocking.csproj" />
+    <ProjectReference Include="..\..\src\Slice.ObjectMapping\Slice.ObjectMapping.csproj" />
+    <ProjectReference Include="..\..\src\Slice.ApiVersioning\Slice.ApiVersioning.csproj" />
+    <ProjectReference Include="..\..\src\Slice.VirtualFileSystem\Slice.VirtualFileSystem.csproj" />
+    <ProjectReference Include="..\..\src\Slice.Management\Slice.Management.csproj" />
+  </ItemGroup>
+
+  <ItemGroup>
+    <PackageReference Include="Microsoft.EntityFrameworkCore.Sqlite" />
+  </ItemGroup>
+
+  <ItemGroup>
+    <EmbeddedResource Include="Resources\welcome.txt" />
+  </ItemGroup>
+
+  <PropertyGroup>
+    <TargetFramework>net10.0</TargetFramework>
+    <Nullable>enable</Nullable>
+    <ImplicitUsings>enable</ImplicitUsings>
+  </PropertyGroup>
+
+</Project>

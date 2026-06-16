@@ -1,0 +1,23 @@
+{
+  "$schema": "http://json.schemastore.org/template",
+  "author": "Slice",
+  "classifications": [ "Slice", "Feature", "VSA" ],
+  "identity": "Slice.Feature.CSharp",
+  "name": "Slice feature slice (command + handler + validator + controller)",
+  "shortName": "slice-feature",
+  "tags": {
+    "language": "C#",
+    "type": "item"
+  },
+  "sourceName": "FeatureName",
+  "preferNameDirectory": false,
+  "symbols": {
+    "module": {
+      "type": "parameter",
+      "datatype": "string",
+      "defaultValue": "App",
+      "replaces": "ModuleName",
+      "description": "The owning module / bounded-context namespace."
+    }
+  }
+}

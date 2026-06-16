@@ -1,0 +1,43 @@
+<Project Sdk="Microsoft.NET.Sdk">
+
+  <PropertyGroup>
+    <TargetFramework>net10.0</TargetFramework>
+    <ImplicitUsings>enable</ImplicitUsings>
+    <Nullable>enable</Nullable>
+    <IsPackable>false</IsPackable>
+  </PropertyGroup>
+
+  <ItemGroup>
+    <PackageReference Include="coverlet.collector" />
+    <PackageReference Include="Microsoft.NET.Test.Sdk" />
+    <PackageReference Include="xunit" />
+    <PackageReference Include="xunit.runner.visualstudio" />
+    <PackageReference Include="Testcontainers.PostgreSql" />
+    <PackageReference Include="Microsoft.Extensions.Hosting" />
+    <PackageReference Include="Microsoft.EntityFrameworkCore.Sqlite" />
+    <PackageReference Include="Npgsql" />
+  </ItemGroup>
+
+  <ItemGroup>
+    <ProjectReference Include="..\..\src\Slice.Core\Slice.Core.csproj" />
+    <ProjectReference Include="..\..\src\Slice.Modularity\Slice.Modularity.csproj" />
+    <ProjectReference Include="..\..\src\Slice.Postgres\Slice.Postgres.csproj" />
+    <ProjectReference Include="..\..\src\Slice.Caching\Slice.Caching.csproj" />
+    <ProjectReference Include="..\..\src\Slice.Caching.Postgres\Slice.Caching.Postgres.csproj" />
+    <ProjectReference Include="..\..\src\Slice.DistributedLocking\Slice.DistributedLocking.csproj" />
+    <ProjectReference Include="..\..\src\Slice.DistributedLocking.Postgres\Slice.DistributedLocking.Postgres.csproj" />
+    <ProjectReference Include="..\..\src\Slice.EventBus\Slice.EventBus.csproj" />
+    <ProjectReference Include="..\..\src\Slice.EventBus.Postgres\Slice.EventBus.Postgres.csproj" />
+    <ProjectReference Include="..\..\src\Slice.BackgroundJobs\Slice.BackgroundJobs.csproj" />
+    <ProjectReference Include="..\..\src\Slice.BackgroundJobs.Postgres\Slice.BackgroundJobs.Postgres.csproj" />
+    <ProjectReference Include="..\..\src\Slice.BlobStoring\Slice.BlobStoring.csproj" />
+    <ProjectReference Include="..\..\src\Slice.BlobStoring.Postgres\Slice.BlobStoring.Postgres.csproj" />
+    <ProjectReference Include="..\..\src\Slice.EntityFrameworkCore\Slice.EntityFrameworkCore.csproj" />
+    <ProjectReference Include="..\..\src\Slice.EntityFrameworkCore.PostgreSQL\Slice.EntityFrameworkCore.PostgreSQL.csproj" />
+  </ItemGroup>
+
+  <ItemGroup>
+    <Using Include="Xunit" />
+  </ItemGroup>
+
+</Project>

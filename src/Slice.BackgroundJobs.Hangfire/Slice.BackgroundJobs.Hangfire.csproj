@@ -1,0 +1,21 @@
+﻿<Project Sdk="Microsoft.NET.Sdk">
+
+  <ItemGroup>
+    <ProjectReference Include="..\Slice.BackgroundJobs\Slice.BackgroundJobs.csproj" />
+    <ProjectReference Include="..\Slice.Core\Slice.Core.csproj" />
+    <ProjectReference Include="..\Slice.Modularity\Slice.Modularity.csproj" />
+  </ItemGroup>
+
+  <ItemGroup>
+    <PackageReference Include="Hangfire.AspNetCore" />
+    <PackageReference Include="Hangfire.Core" />
+    <PackageReference Include="Microsoft.Extensions.DependencyInjection.Abstractions" />
+  </ItemGroup>
+
+  <PropertyGroup>
+    <TargetFramework>net10.0</TargetFramework>
+    <ImplicitUsings>enable</ImplicitUsings>
+    <Nullable>enable</Nullable>
+  </PropertyGroup>
+
+</Project>

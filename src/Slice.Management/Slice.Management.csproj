@@ -1,0 +1,22 @@
+﻿<Project Sdk="Microsoft.NET.Sdk">
+
+  <ItemGroup>
+    <ProjectReference Include="..\Slice.Core\Slice.Core.csproj" />
+    <ProjectReference Include="..\Slice.Modularity\Slice.Modularity.csproj" />
+    <ProjectReference Include="..\Slice.Application\Slice.Application.csproj" />
+    <ProjectReference Include="..\Slice.Authorization\Slice.Authorization.csproj" />
+    <ProjectReference Include="..\Slice.Authentication\Slice.Authentication.csproj" />
+    <ProjectReference Include="..\Slice.MultiTenancy\Slice.MultiTenancy.csproj" />
+    <ProjectReference Include="..\Slice.EntityFrameworkCore\Slice.EntityFrameworkCore.csproj" />
+    <ProjectReference Include="..\Slice.AspNetCore\Slice.AspNetCore.csproj" />
+    <ProjectReference Include="..\Slice.Settings\Slice.Settings.csproj" />
+    <ProjectReference Include="..\Slice.Features\Slice.Features.csproj" />
+  </ItemGroup>
+
+  <PropertyGroup>
+    <TargetFramework>net10.0</TargetFramework>
+    <ImplicitUsings>enable</ImplicitUsings>
+    <Nullable>enable</Nullable>
+  </PropertyGroup>
+
+</Project>

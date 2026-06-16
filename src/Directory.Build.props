@@ -1,0 +1,20 @@
+<Project>
+
+  <!-- Chain to the repo-root props (TFM, nullable, implicit usings, …) -->
+  <Import Project="$([MSBuild]::GetPathOfFileAbove('Directory.Build.props', '$(MSBuildThisFileDirectory)../'))" />
+
+  <!-- Framework libraries are packable NuGet packages -->
+  <PropertyGroup>
+    <IsPackable>true</IsPackable>
+    <Version>0.1.0</Version>
+    <Authors>Slice</Authors>
+    <Company>Slice</Company>
+    <Product>Slice Framework</Product>
+    <Description>$(MSBuildProjectName) — part of Slice, a .NET Vertical Slice Architecture + DDD application framework.</Description>
+    <PackageTags>vsa;ddd;cqrs;framework;mediator;modular</PackageTags>
+    <PackageLicenseExpression>MIT</PackageLicenseExpression>
+    <IncludeSymbols>true</IncludeSymbols>
+    <SymbolPackageFormat>snupkg</SymbolPackageFormat>
+  </PropertyGroup>
+
+</Project>

@@ -1,0 +1,23 @@
+{
+  "$schema": "http://json.schemastore.org/template",
+  "author": "Slice",
+  "classifications": [ "Slice", "Module", "VSA", "DDD" ],
+  "identity": "Slice.Module.CSharp",
+  "name": "Slice bounded-context module (module + DbContext + aggregate + repository + feature)",
+  "shortName": "slice-module",
+  "tags": {
+    "language": "C#",
+    "type": "project"
+  },
+  "sourceName": "ModuleName",
+  "preferNameDirectory": true,
+  "symbols": {
+    "SliceVersion": {
+      "type": "parameter",
+      "datatype": "string",
+      "defaultValue": "0.1.0",
+      "replaces": "SLICE_VERSION",
+      "description": "Version of the Slice.* NuGet packages to reference."
+    }
+  }
+}

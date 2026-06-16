@@ -1,0 +1,44 @@
+{
+  "$schema": "http://json.schemastore.org/template",
+  "author": "Slice",
+  "classifications": [ "Slice", "Web", "API", "VSA", "DDD" ],
+  "identity": "Slice.Api.CSharp",
+  "name": "Slice API host (full runnable application + module + DbContext + sample feature)",
+  "shortName": "slice-api",
+  "tags": {
+    "language": "C#",
+    "type": "project"
+  },
+  "sourceName": "SliceApp",
+  "preferNameDirectory": true,
+  "symbols": {
+    "SliceVersion": {
+      "type": "parameter",
+      "datatype": "string",
+      "defaultValue": "0.1.0",
+      "replaces": "SLICE_VERSION",
+      "description": "Version of the Slice.* NuGet packages to reference."
+    },
+    "database": {
+      "type": "parameter",
+      "datatype": "choice",
+      "choices": [
+        { "choice": "sqlite", "description": "SQLite — zero dependencies (default)" },
+        { "choice": "postgres", "description": "PostgreSQL — the full Slice Postgres stack (cache, lock, event bus, jobs, blob, vector) on one database" }
+      ],
+      "defaultValue": "sqlite",
+      "description": "Database / backing-services stack."
+    },
+    "Postgres": {
+      "type": "computed",
+      "value": "(database == \"postgres\")"
+    }
+  },
+  "sources": [
+    {
+      "modifiers": [
+        { "condition": "(!Postgres)", "exclude": [ "docker-compose.yml" ] }
+      ]
+    }
+  ]
+}

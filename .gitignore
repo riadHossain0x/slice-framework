@@ -1,0 +1,49 @@
+# Build output
+[Bb]in/
+[Oo]bj/
+[Oo]ut/
+artifacts/
+
+# Test results
+[Tt]est[Rr]esults/
+*.trx
+*.coverage
+*.coverage.xml
+coverage*.json
+coverage*.cobertura.xml
+
+# .NET / NuGet
+*.user
+*.suo
+*.userosscache
+*.sln.docstates
+project.lock.json
+project.fragment.lock.json
+.packages/
+*.nupkg
+*.snupkg
+
+# Rider / JetBrains
+.idea/
+*.DotSettings.user
+
+# Visual Studio / VS Code
+.vs/
+.vscode/
+
+# macOS / OS cruft
+.DS_Store
+Thumbs.db
+
+# Sample / local databases (SQLite, auto-created at runtime)
+*.db
+*.db-shm
+*.db-wal
+*.sqlite
+*.sqlite3
+
+# Logs / temp
+*.log
+
+# Local Claude Code settings
+.claude/settings.local.json

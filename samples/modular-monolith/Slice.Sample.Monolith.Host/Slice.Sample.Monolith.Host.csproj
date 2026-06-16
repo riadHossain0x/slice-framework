@@ -1,0 +1,18 @@
+<Project Sdk="Microsoft.NET.Sdk.Web">
+
+  <ItemGroup>
+    <ProjectReference Include="..\..\..\src\Slice.AspNetCore\Slice.AspNetCore.csproj" />
+    <ProjectReference Include="..\..\..\src\Slice.Modularity\Slice.Modularity.csproj" />
+    <ProjectReference Include="..\Slice.Sample.Monolith.Sales\Slice.Sample.Monolith.Sales.csproj" />
+    <ProjectReference Include="..\Slice.Sample.Monolith.Billing\Slice.Sample.Monolith.Billing.csproj" />
+    <ProjectReference Include="..\Slice.Sample.Monolith.Inventory\Slice.Sample.Monolith.Inventory.csproj" />
+    <ProjectReference Include="..\Slice.Sample.Monolith.Notifications\Slice.Sample.Monolith.Notifications.csproj" />
+  </ItemGroup>
+
+  <PropertyGroup>
+    <TargetFramework>net10.0</TargetFramework>
+    <Nullable>enable</Nullable>
+    <ImplicitUsings>enable</ImplicitUsings>
+  </PropertyGroup>
+
+</Project>

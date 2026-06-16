@@ -1,0 +1,25 @@
+<Project Sdk="Microsoft.NET.Sdk">
+
+  <ItemGroup>
+    <ProjectReference Include="..\..\..\src\Slice.AspNetCore\Slice.AspNetCore.csproj" />
+    <ProjectReference Include="..\..\..\src\Slice.Application\Slice.Application.csproj" />
+    <ProjectReference Include="..\..\..\src\Slice.Domain\Slice.Domain.csproj" />
+    <ProjectReference Include="..\..\..\src\Slice.Mediator.Default\Slice.Mediator.Default.csproj" />
+    <ProjectReference Include="..\..\..\src\Slice.EntityFrameworkCore\Slice.EntityFrameworkCore.csproj" />
+    <ProjectReference Include="..\..\..\src\Slice.LinqToDB\Slice.LinqToDB.csproj" />
+    <ProjectReference Include="..\..\..\src\Slice.EventBus\Slice.EventBus.csproj" />
+    <ProjectReference Include="..\Slice.Sample.Monolith.Contracts\Slice.Sample.Monolith.Contracts.csproj" />
+  </ItemGroup>
+
+  <ItemGroup>
+    <PackageReference Include="Microsoft.EntityFrameworkCore.Sqlite" />
+    <PackageReference Include="linq2db" />
+  </ItemGroup>
+
+  <PropertyGroup>
+    <TargetFramework>net10.0</TargetFramework>
+    <Nullable>enable</Nullable>
+    <ImplicitUsings>enable</ImplicitUsings>
+  </PropertyGroup>
+
+</Project>

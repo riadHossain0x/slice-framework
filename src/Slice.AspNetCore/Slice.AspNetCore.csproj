@@ -1,0 +1,21 @@
+﻿<Project Sdk="Microsoft.NET.Sdk">
+
+  <ItemGroup>
+    <FrameworkReference Include="Microsoft.AspNetCore.App" />
+    <PackageReference Include="Microsoft.AspNetCore.OpenApi" />
+    <PackageReference Include="Scalar.AspNetCore" />
+  </ItemGroup>
+
+  <ItemGroup>
+    <ProjectReference Include="..\Slice.Application\Slice.Application.csproj" />
+    <ProjectReference Include="..\Slice.Mediator\Slice.Mediator.csproj" />
+    <ProjectReference Include="..\Slice.Modularity\Slice.Modularity.csproj" />
+  </ItemGroup>
+
+  <PropertyGroup>
+    <TargetFramework>net10.0</TargetFramework>
+    <ImplicitUsings>enable</ImplicitUsings>
+    <Nullable>enable</Nullable>
+  </PropertyGroup>
+
+</Project>

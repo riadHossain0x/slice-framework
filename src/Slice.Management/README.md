@@ -39,7 +39,8 @@ services.AddSliceManagementStore(b => b.UseSqlite("Data Source=management.db"));
 | `IPermissionGrantManager` / `PermissionGrantManager` | `interface` / `sealed class`, `IScopedDependency` | `GetGrantedAsync` / `GrantAsync` / `RevokeAsync`. |
 | `ITenantManager` / `TenantManager` | `interface` / `sealed class`, `IScopedDependency` | `CreateAsync(name, connectionString?)` / `GetListAsync` / `FindByNameAsync` / `FindByIdAsync` / `DeleteAsync`. |
 | `ManagementTenantConnectionStore` | `sealed class`, `ITenantConnectionStore` | Cached, registry-backed per-tenant connection strings for **database-per-tenant** (`AddSliceManagementTenantConnectionStore`). |
-| `ITenantDatabaseMigrator` / `TenantDatabaseMigrator<TContext>` | `interface` / `sealed class` | Applies EF migrations across the host DB + every registered tenant: `MigrateAllAsync()` (startup) and `MigrateTenantAsync(tenantId?)` (onboarding; `null` ⇒ host). See [multi-tenancy](../../docs/multitenancy.md#migrating-tenant-databases). |
+| `ITenantDatabaseMigrator` / `TenantDatabaseMigrator<TContext>` | `interface` / `sealed class` | Applies EF migrations across the host DB + every registered tenant: `MigrateAllAsync()` (sequential, fail-fast — startup), `MigrateAllAsync(TenantMigrationOptions)` (bounded parallelism + continue-on-error + optional `IDistributedLock` single-runner; returns a `TenantMigrationReport`), and `MigrateTenantAsync(tenantId?)` (onboarding; `null` ⇒ host). See [multi-tenancy](../../docs/multitenancy.md#migrating-tenant-databases). |
+| `TenantMigrationOptions` / `TenantMigrationReport` | `sealed class` | Run tuning (`MaxDegreeOfParallelism`, `ContinueOnError`, `UseDistributedLock`/`LockKey`/`LockTimeout`) and per-tenant outcome (`Results`, `Succeeded`, `Failed`, `LockNotAcquired`). |
 | `TenantDatabaseMigratorRegistration` | `static class` | `AddSliceTenantDatabaseMigrator<TContext>(this IServiceCollection)` — registers the migrator for the per-tenant context. |
 | `ManagementSettingValueProvider` | `sealed class`, `ISettingValueProvider`, `IScopedDependency` | `Order = -10`; resolves U → T → G. |
 | `ManagementFeatureStore` | `sealed class`, `IFeatureStore`, `IScopedDependency` | Resolves T → G → `Features:{name}` config. |
@@ -93,8 +94,13 @@ Migrate every tenant database (database-per-tenant) — register the migrator, t
 ```csharp
 services.AddSliceTenantDatabaseMigrator<TenantDbContext>();          // alongside AddSliceMultiTenantDbContext
 // ...
-await migrator.MigrateAllAsync(ct);                                  // host/default + every registered tenant
+await migrator.MigrateAllAsync(ct);                                  // sequential, fail-fast (startup path)
 await migrator.MigrateTenantAsync(tenant.Id, ct);                   // a single tenant (on onboarding)
+
+// Fleet run from a dedicated migration job (bounded parallelism, collect failures, single-runner lock):
+var report = await migrator.MigrateAllAsync(new TenantMigrationOptions
+    { MaxDegreeOfParallelism = 4, ContinueOnError = true, UseDistributedLock = true }, ct);
+// report.Succeeded / report.Failed / report.Results — run as a separate process for large fleets
 ```
 
 ## Notes

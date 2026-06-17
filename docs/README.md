@@ -32,6 +32,7 @@ exact API surface (linked from the [Package reference](#package-reference) below
 | 10c | [Minimal APIs](minimal-apis.md) | `ISliceEndpoint` + `MapSliceEndpoints`, `Result`→HTTP mapping, HAL/ETag parity, versioned groups, OpenAPI, coexistence with controllers |
 | 11 | [Configuration reference](configuration-reference.md) | Every configuration key the framework reads |
 | 12 | [Testing](testing.md) | The test suite, Testcontainers patterns, how to test a slice |
+| 13 | [Microservices](microservices.md) | Modular-monolith → services: extraction model, comms, transactions/saga, auth server, the menu/app-config gap, platform concerns (discovery/gateway/LB) |
 
 ---
 

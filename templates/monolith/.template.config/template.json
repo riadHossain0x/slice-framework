@@ -1,0 +1,23 @@
+{
+  "$schema": "http://json.schemastore.org/template",
+  "author": "Slice",
+  "classifications": [ "Slice", "Modular Monolith", "Solution", "VSA", "DDD" ],
+  "identity": "Slice.Monolith.CSharp",
+  "name": "Slice modular monolith (solution: host + 2 bounded-context modules + shared contracts, choreographed by in-process events)",
+  "shortName": "slice-monolith",
+  "tags": {
+    "language": "C#",
+    "type": "solution"
+  },
+  "sourceName": "MonolithApp",
+  "preferNameDirectory": true,
+  "symbols": {
+    "SliceVersion": {
+      "type": "parameter",
+      "datatype": "string",
+      "defaultValue": "0.1.0",
+      "replaces": "SLICE_VERSION",
+      "description": "Version of the Slice.* NuGet packages to reference."
+    }
+  }
+}

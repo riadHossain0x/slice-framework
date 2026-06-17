@@ -1,0 +1,44 @@
+{
+  "$schema": "http://json.schemastore.org/template",
+  "author": "Slice",
+  "classifications": [ "Slice", "Web", "API", "Multi-tenant", "Solution", "VSA", "DDD" ],
+  "identity": "Slice.TenantApi.CSharp",
+  "name": "Slice database-per-tenant API (solution: API host with tenant registry + onboarding + a separate migration job)",
+  "shortName": "slice-tenant-api",
+  "tags": {
+    "language": "C#",
+    "type": "project"
+  },
+  "sourceName": "TenantApp",
+  "preferNameDirectory": true,
+  "symbols": {
+    "SliceVersion": {
+      "type": "parameter",
+      "datatype": "string",
+      "defaultValue": "0.1.0",
+      "replaces": "SLICE_VERSION",
+      "description": "Version of the Slice.* NuGet packages to reference."
+    },
+    "migrations": {
+      "type": "parameter",
+      "datatype": "choice",
+      "choices": [
+        { "choice": "host", "description": "Migrate in-process at host startup (default; single project)" },
+        { "choice": "job", "description": "Separate migration job project (decoupled; the host does not migrate)" }
+      ],
+      "defaultValue": "host",
+      "description": "How tenant database migrations run."
+    },
+    "Job": {
+      "type": "computed",
+      "value": "(migrations == \"job\")"
+    }
+  },
+  "sources": [
+    {
+      "modifiers": [
+        { "condition": "(!Job)", "exclude": [ "TenantApp.Migrator/**", "appsettings.json" ] }
+      ]
+    }
+  ]
+}

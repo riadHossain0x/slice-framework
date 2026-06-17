@@ -1,0 +1,21 @@
+<Project Sdk="Microsoft.NET.Sdk">
+
+  <PropertyGroup>
+    <OutputType>Exe</OutputType>
+    <TargetFramework>net10.0</TargetFramework>
+    <Nullable>enable</Nullable>
+    <ImplicitUsings>enable</ImplicitUsings>
+    <ManagePackageVersionsCentrally>false</ManagePackageVersionsCentrally>
+    <RootNamespace>SliceWorker</RootNamespace>
+  </PropertyGroup>
+
+  <ItemGroup>
+    <PackageReference Include="Slice.BackgroundWorkers" Version="SLICE_VERSION" />
+    <PackageReference Include="Slice.Application" Version="SLICE_VERSION" />
+    <PackageReference Include="Slice.Mediator.Default" Version="SLICE_VERSION" />
+    <PackageReference Include="Slice.Modularity" Version="SLICE_VERSION" />
+    <!-- Headless Generic Host (no ASP.NET): Slice.BackgroundWorkers has no web dependency. -->
+    <PackageReference Include="Microsoft.Extensions.Hosting" Version="10.0.0" />
+  </ItemGroup>
+
+</Project>

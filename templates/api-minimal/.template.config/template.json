@@ -1,0 +1,23 @@
+{
+  "$schema": "http://json.schemastore.org/template",
+  "author": "Slice",
+  "classifications": [ "Slice", "Web", "API", "Minimal API", "VSA", "DDD" ],
+  "identity": "Slice.ApiMinimal.CSharp",
+  "name": "Slice minimal-API host (controller-free ISliceEndpoint host + module + DbContext + sample feature)",
+  "shortName": "slice-api-minimal",
+  "tags": {
+    "language": "C#",
+    "type": "project"
+  },
+  "sourceName": "SliceMinimalApp",
+  "preferNameDirectory": true,
+  "symbols": {
+    "SliceVersion": {
+      "type": "parameter",
+      "datatype": "string",
+      "defaultValue": "0.1.0",
+      "replaces": "SLICE_VERSION",
+      "description": "Version of the Slice.* NuGet packages to reference."
+    }
+  }
+}

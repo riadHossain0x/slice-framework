@@ -385,9 +385,17 @@ adapter's `Add…`:
 
 ## Scaffolding from templates
 
-[`Slice.Templates`](templates) ships three `dotnet new` templates: **`slice-api`** (a full runnable
-host), **`slice-module`** (a bounded-context classlib), and **`slice-feature`** (a vertical-slice item
-template).
+[`Slice.Templates`](templates) ships seven `dotnet new` templates:
+
+| Short name | Produces |
+|---|---|
+| **`slice-api`** | full controller host (auth + management + EF); `--database sqlite\|postgres` |
+| **`slice-api-minimal`** | controller-free minimal-API host (`ISliceEndpoint`, HAL/ETag/OpenAPI) |
+| **`slice-module`** | a bounded-context classlib (module + DbContext + aggregate + feature) |
+| **`slice-monolith`** | a modular-monolith **solution** (Host + Orders + Billing + Contracts, in-process events) |
+| **`slice-worker`** | a headless worker host (no web) with a periodic `IBackgroundWorker` |
+| **`slice-tenant-api`** | a database-per-tenant API (tenant registry/onboarding); `--migrations host` (default, in-host) or `job` (adds a separate migration-job project) |
+| **`slice-feature`** | a single vertical slice (item template) to drop into a module |
 
 ```bash
 # one-time: build packages + the template package, install the templates
@@ -400,6 +408,12 @@ dotnet new slice-api -n Acme.Shop -o Acme.Shop
 cd Acme.Shop
 dotnet nuget add source ../artifacts -n slice-local --configfile nuget.config
 dotnet run            # admin@slice / Admin123! ; POST /connect/token then call /api/notes
+
+# other starters
+dotnet new slice-api-minimal -n Acme.Api -o Acme.Api
+dotnet new slice-monolith    -n Acme     -o Acme
+dotnet new slice-worker      -n Acme.Jobs -o Acme.Jobs
+dotnet new slice-tenant-api  -n Acme.Tenants -o Acme.Tenants
 
 # add a bounded context, then a slice inside it
 dotnet new slice-module -n Billing -o Billing

@@ -12,6 +12,7 @@ tests (Testcontainers) for the parts that can only be trusted against a real bro
 | `Slice.Domain.Tests` | unit | aggregates, value objects, specifications, `Ensure` guards (11 tests) |
 | `Slice.Mediator.Conformance.Tests` | unit | both mediator engines behave identically (3 tests) |
 | `Slice.Architecture.Tests` | architecture (NetArchTest) | Domain has no infra deps; slices don't reference each other; controllers inherit `SliceController` (5 tests) |
+| `Slice.Templates.Tests` | structural (no build) | `dotnet new` templates: valid manifests, unique identities/short-names, all templates packaged, runnable templates ship a `nuget.config`, projects reference the framework as `SLICE_VERSION` packages (not `src/` project refs) |
 | `Slice.Data.Tests` | integration (SQLite) | EF + Dapper + LinqToDB share one connection/transaction; database-per-tenant isolation (2 tests) |
 | `Slice.Serilog.Tests` | integration (in-memory sink) | logging routes through Serilog + LogContext enrichment (1 test) |
 | `Slice.AspNetCore.SignalR.Tests` | integration (Kestrel + client) | hub invoke + server push (1 test) |
@@ -33,6 +34,17 @@ dotnet test Slice.slnx \
 
 Stack: **xUnit** (v2), **NetArchTest** for architecture rules, **Testcontainers** for real
 infrastructure.
+
+### Template coverage
+
+`Slice.Templates.Tests` runs with the normal suite and statically validates the `dotnet new` templates
+(manifests, packaging, package-reference conventions) without building anything. The heavy end-to-end
+check — pack the framework + templates, install them, then scaffold **and build** every template
+(including both `slice-tenant-api --migrations host|job` modes) — lives in a script (needs the network):
+
+```bash
+eng/smoke-templates.sh
+```
 
 ---
 

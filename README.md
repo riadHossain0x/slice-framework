@@ -361,6 +361,10 @@ Vector search (`Slice.Vector` + `Slice.Vector.Postgres`) pairs with an `IEmbeddi
 (`HashingEmbeddingGenerator` for dev, [OpenAI-compatible](src/Slice.Embeddings.OpenAI/README.md) for
 prod). Scaffold one with `dotnet new slice-api --database postgres`.
 
+The "stack" is optional: each row above is an independent adapter on the shared `Slice.Postgres` data
+source (its own `AddSlicePostgresXxx()`), so you can put just **one** seam on Postgres and keep the rest
+elsewhere. `AddSlicePostgresStack` is simply the one-call aggregator of those registrations.
+
 → Deep dive: [**The PostgreSQL stack**](docs/postgresql-stack.md)
 
 ### Seams & adapters
@@ -468,7 +472,8 @@ annotated reference with summaries is in [**docs/README.md → Package reference
 [ObjectMapping](src/Slice.ObjectMapping/README.md) · [VirtualFileSystem](src/Slice.VirtualFileSystem/README.md) ·
 [Serilog](src/Slice.Serilog/README.md)
 
-**PostgreSQL stack** — [Postgres](src/Slice.Postgres/README.md) · [PostgresStack](src/Slice.PostgresStack/README.md) ·
+**PostgreSQL adapters** (foundation `Slice.Postgres` + per-seam adapters, each opt-in on its own;
+`Slice.PostgresStack` just aggregates them) — [Postgres](src/Slice.Postgres/README.md) · [PostgresStack](src/Slice.PostgresStack/README.md) ·
 [EntityFrameworkCore.PostgreSQL](src/Slice.EntityFrameworkCore.PostgreSQL/README.md) ·
 [Caching.Postgres](src/Slice.Caching.Postgres/README.md) ·
 [DistributedLocking.Postgres](src/Slice.DistributedLocking.Postgres/README.md) ·

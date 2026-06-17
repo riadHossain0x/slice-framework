@@ -170,7 +170,12 @@ behind a seam via a `RemoveAll<T>()` + `Add…` registration.
 | `Slice.VirtualFileSystem` | Composite embedded + physical file provider | [↗](../src/Slice.VirtualFileSystem/README.md) |
 | `Slice.Serilog` | Serilog host integration + request logging | [↗](../src/Slice.Serilog/README.md) |
 
-### PostgreSQL stack (run everything on Postgres) — see [the guide](postgresql-stack.md)
+### PostgreSQL adapters (run everything on Postgres — or just one thing) — see [the guide](postgresql-stack.md)
+
+`Slice.Postgres` is the shared foundation (one `NpgsqlDataSource`); **each adapter below is independently
+usable** via its own `AddSlicePostgresXxx()` on top of it — you don't need `Slice.PostgresStack`, which is
+just the one-call aggregator of those same registrations.
+
 | Package | Summary | README |
 |---|---|---|
 | `Slice.Postgres` | Shared `NpgsqlDataSource` pool + schema initializer | [↗](../src/Slice.Postgres/README.md) |

@@ -27,6 +27,25 @@ builder.Services.AddSliceDbContext<AppDbContext>((sp, o) =>
 
 ---
 
+## À la carte — use any adapter on its own
+
+The "stack" is a convenience, not a requirement. Each adapter is an independent opt-in package that
+depends only on **`Slice.Postgres`** (the shared data source) plus its own seam abstraction — **none of
+them depends on `Slice.PostgresStack`**. So you can adopt a single Postgres-backed seam without the rest,
+and freely mix backends (e.g. EF on SQL Server, the event bus on Postgres, the cache on Redis):
+
+```csharp
+// event bus only — reference Slice.Postgres + Slice.EventBus.Postgres
+services.AddSlicePostgres(connectionString);   // the shared NpgsqlDataSource pool
+services.AddSlicePostgresEventBus();           // reuses it — no Slice.PostgresStack needed
+```
+
+Each adapter exposes its own `AddSlicePostgresXxx()` (and accepts an optional connection string to
+register the pool itself). `Slice.PostgresStack` simply calls these for you — see
+[The one-call stack](#the-one-call-stack--slicepostgresstack) below.
+
+---
+
 ## One shared connection pool
 
 The foundation package **`Slice.Postgres`** registers a single `NpgsqlDataSource` (one connection
@@ -155,7 +174,10 @@ var hits = await collection.SearchAsync(await embedder.GenerateAsync(query, ct),
 
 `AddSlicePostgresStack(connectionString, configure?)` builds the single shared `NpgsqlDataSource`
 (with `UseVector()` when the vector store is enabled) and wires every adapter on it. Each part is
-toggleable via `PostgresStackOptions` (all on by default).
+toggleable via `PostgresStackOptions` (all on by default). It is purely a convenience aggregator — it
+just calls `AddSlicePostgres(connectionString)` followed by each adapter's `AddSlicePostgresXxx()`; you
+can make those same calls yourself (see [À la carte](#à-la-carte--use-any-adapter-on-its-own)) if you
+only want some of them.
 
 ```csharp
 builder.Services.AddSlicePostgresStack(connectionString, o =>

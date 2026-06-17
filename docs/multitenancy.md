@@ -185,6 +185,46 @@ later is applied to **all** existing tenant databases on the next startup. The r
 > builds the context against the host connection string, so `dotnet ef migrations add …` doesn't need a
 > running app or an ambient tenant. See the sample's `TenantDbContextDesignTimeFactory`.
 
+#### At scale: migrate from a separate process
+
+Running `MigrateAllAsync()` in the serving app at startup is fine for dev and small/fixed fleets, but for
+many tenants or multiple replicas it couples schema evolution to request serving — it delays readiness,
+every replica races, and one tenant's failure can abort startup for all. For production, **decouple
+migration from serving**:
+
+- Set `MultiTenant:RunMigrationsOnStartup=false` so the serving app never migrates in-process.
+- Run migrations from a dedicated job/executable (a deploy step or Kubernetes `Job`) **before** rolling
+  out the app. The runnable [`Slice.Sample.MultiTenant.Migrator`](../samples/Slice.Sample.MultiTenant.Migrator/)
+  console project composes the same module graph and calls `MigrateAllAsync(...)`, returning a non-zero
+  exit code if any tenant fails.
+
+The options overload tunes a fleet run and returns a per-tenant `TenantMigrationReport`:
+
+```csharp
+var report = await migrator.MigrateAllAsync(new TenantMigrationOptions
+{
+    MaxDegreeOfParallelism = 4,   // migrate tenants concurrently (default 1 = sequential)
+    ContinueOnError = true,       // attempt every tenant; collect failures instead of aborting (default false = fail-fast)
+    UseDistributedLock = true,    // single-runner guard via IDistributedLock (no-op default; register Redis for real coordination)
+});
+// report.Succeeded / report.Failed / report.Results[]; report.LockNotAcquired when another runner holds the lock
+```
+
+The default parameterless `MigrateAllAsync()` stays sequential + fail-fast (the startup path). Onboarding
+a single new tenant still uses `MigrateTenantAsync(id)` inline — it's one database, triggered by an
+explicit admin action, not the whole fleet.
+
+When several migration jobs might run at once (e.g. one per replica in a rolling deploy), set
+`UseDistributedLock = true` and register a real `IDistributedLock` so only one runner migrates the fleet;
+the others get `report.LockNotAcquired == true` and no-op. The sample Migrator wires Redis when
+`ConnectionStrings:Redis` (env `ConnectionStrings__Redis`) is set — `services.AddSliceRedisDistributedLock(cs)`
+after `AddSliceModules` — and falls back to the no-op lock otherwise.
+
+> The Redis lock (`Slice.DistributedLocking.Redis`) holds a fixed 30-second TTL with no auto-renewal, and
+> `TenantMigrationOptions.LockTimeout` is the *acquire-wait*, not the hold time. That's enough to
+> coordinate job starts, but a fleet migration running longer than the TTL can have its lock expire
+> mid-run — for long migrations use a renewing/longer-TTL lock implementation.
+
 ### When to use which
 
 | | Row-level | Database-per-tenant |

@@ -93,7 +93,11 @@ public sealed class TenantModule : SliceModule
 
         // Provision/upgrade the host DB and every registered tenant's DB by applying EF migrations.
         // (Replaces EnsureCreated: this writes __EFMigrationsHistory and evolves existing schemas.)
-        using (var scope = sp.CreateScope())
-            await scope.ServiceProvider.GetRequiredService<ITenantDatabaseMigrator>().MigrateAllAsync();
+        // For large fleets / multiple replicas, set MultiTenant:RunMigrationsOnStartup=false and run the
+        // separate Slice.Sample.MultiTenant.Migrator job instead (decouples migration from serving).
+        var runOnStartup = sp.GetRequiredService<IConfiguration>().GetValue("MultiTenant:RunMigrationsOnStartup", true);
+        if (runOnStartup)
+            using (var scope = sp.CreateScope())
+                await scope.ServiceProvider.GetRequiredService<ITenantDatabaseMigrator>().MigrateAllAsync();
     }
 }

@@ -3,6 +3,7 @@
     <Project Path="samples/Slice.Sample.Crm/Slice.Sample.Crm.csproj" />
     <Project Path="samples/Slice.Sample.PostgresStack/Slice.Sample.PostgresStack.csproj" />
     <Project Path="samples/Slice.Sample.MultiTenant/Slice.Sample.MultiTenant.csproj" />
+    <Project Path="samples/Slice.Sample.MultiTenant.Migrator/Slice.Sample.MultiTenant.Migrator.csproj" />
     <Project Path="samples/Slice.Sample.MinimalApi/Slice.Sample.MinimalApi.csproj" />
   </Folder>
   <Folder Name="/samples/modular-monolith/">

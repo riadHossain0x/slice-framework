@@ -4,6 +4,9 @@ using Slice.Modularity;
 using Slice.MultiTenancy;
 using Slice.Sample.MultiTenant;
 
+// Migrations run at startup by default (convenient for dev). In production with many tenants / multiple
+// replicas, set MultiTenant:RunMigrationsOnStartup=false and run the separate
+// Slice.Sample.MultiTenant.Migrator job before rolling out the app.
 var builder = WebApplication.CreateBuilder(args);
 builder.Services.AddSliceModules<TenantModule>(builder.Configuration);
 builder.Services.AddSliceOpenApi();

@@ -57,7 +57,7 @@ See [Testing](testing.md).
 
 ## Scaffold a new application from templates
 
-Slice ships three `dotnet new` templates in the `Slice.Templates` package.
+Slice ships seven `dotnet new` templates in the `Slice.Templates` package.
 
 ```bash
 # one-time: build the packages + the template package, install the templates
@@ -68,8 +68,12 @@ dotnet new install ./artifacts/Slice.Templates.0.1.0.nupkg
 
 | Template | Short name | Produces |
 |---|---|---|
-| Slice API host | `slice-api` | A full, runnable host: `Program.cs` + root `AppModule` (auth + management + EF wired), a `Note` aggregate, `CreateNote`/`ListNotes` slices, `appsettings`, `nuget.config` |
+| Slice API host | `slice-api` | A full, runnable **controller** host: `Program.cs` + root `AppModule` (auth + management + EF wired), a `Note` aggregate, `CreateNote`/`ListNotes` slices, `appsettings`, `nuget.config`. `--database sqlite\|postgres` |
+| Slice minimal-API host | `slice-api-minimal` | A controller-free host: `ISliceEndpoint` slices (`CreateNote`/`GetNote`/`ListNotes`), HAL + ETag + OpenAPI/Scalar, versioned group |
 | Slice bounded-context module | `slice-module` | A classlib bounded context: module + `DbContext` + `Item` aggregate + repository + permission provider + a feature |
+| Slice modular monolith | `slice-monolith` | A multi-project **solution**: `Host` + `Orders` + `Billing` modules + shared `Contracts`, choreographed by in-process distributed events (Orders → `OrderPlacedEto` → Billing → `InvoiceCreatedEto`) |
+| Slice worker host | `slice-worker` | A headless console host (no web): module composition + a periodic `IBackgroundWorker`. For background jobs / scheduled work |
+| Slice database-per-tenant API | `slice-tenant-api` | A db-per-tenant API (tenant registry + runtime `POST /api/tenants` onboarding + EF migrations). `--migrations host` (default) migrates in-process at startup (single project); `--migrations job` adds a separate `.Migrator` console job and turns off in-host migration |
 | Slice feature slice | `slice-feature` | A single vertical slice (command + validator + handler + controller) to drop into a module |
 
 ```bash
@@ -86,6 +90,16 @@ dotnet new slice-module -n Billing -o Billing
 
 # add a vertical slice into a module (set --module to that module's namespace)
 dotnet new slice-feature -n ArchiveNote --module Acme.Shop
+```
+
+Other starters (each ships its own `nuget.config` — add the local feed the same way):
+
+```bash
+dotnet new slice-api-minimal -n Acme.Api -o Acme.Api      # controller-free minimal-API host
+dotnet new slice-monolith    -n Acme     -o Acme          # solution: Host + Orders + Billing + Contracts
+dotnet new slice-worker      -n Acme.Jobs -o Acme.Jobs     # headless background-worker host
+dotnet new slice-tenant-api  -n Acme.Tenants -o Acme.Tenants                   # db-per-tenant API (in-host migration)
+dotnet new slice-tenant-api  -n Acme.Tenants -o Acme.Tenants --migrations job  # … + a separate migration job
 ```
 
 ---

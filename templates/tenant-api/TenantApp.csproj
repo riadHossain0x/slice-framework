@@ -1,0 +1,32 @@
+<Project Sdk="Microsoft.NET.Sdk.Web">
+
+  <PropertyGroup>
+    <TargetFramework>net10.0</TargetFramework>
+    <Nullable>enable</Nullable>
+    <ImplicitUsings>enable</ImplicitUsings>
+    <ManagePackageVersionsCentrally>false</ManagePackageVersionsCentrally>
+    <RootNamespace>TenantApp</RootNamespace>
+  </PropertyGroup>
+
+  <ItemGroup>
+    <PackageReference Include="Slice.AspNetCore" Version="SLICE_VERSION" />
+    <PackageReference Include="Slice.Application" Version="SLICE_VERSION" />
+    <PackageReference Include="Slice.Domain" Version="SLICE_VERSION" />
+    <PackageReference Include="Slice.Mediator.Default" Version="SLICE_VERSION" />
+    <PackageReference Include="Slice.EntityFrameworkCore" Version="SLICE_VERSION" />
+    <PackageReference Include="Slice.MultiTenancy" Version="SLICE_VERSION" />
+    <PackageReference Include="Slice.Management" Version="SLICE_VERSION" />
+    <PackageReference Include="FluentValidation" Version="11.11.0" />
+    <PackageReference Include="Microsoft.EntityFrameworkCore.Sqlite" Version="10.0.0" />
+    <PackageReference Include="Microsoft.EntityFrameworkCore.Design" Version="10.0.0" PrivateAssets="all" />
+  </ItemGroup>
+
+  <ItemGroup>
+    <!-- The migration job is a separate project in the TenantApp.Migrator subfolder; keep its sources
+         out of this project's recursive globs. No-op when scaffolded without the job. -->
+    <Compile Remove="TenantApp.Migrator\**\*.cs" />
+    <Content Remove="TenantApp.Migrator\**" />
+    <None Remove="TenantApp.Migrator\**" />
+  </ItemGroup>
+
+</Project>

@@ -1,0 +1,23 @@
+{
+  "$schema": "http://json.schemastore.org/template",
+  "author": "Slice",
+  "classifications": [ "Slice", "Worker", "Console", "VSA", "DDD" ],
+  "identity": "Slice.Worker.CSharp",
+  "name": "Slice worker host (headless console: module composition + a periodic background worker)",
+  "shortName": "slice-worker",
+  "tags": {
+    "language": "C#",
+    "type": "project"
+  },
+  "sourceName": "SliceWorker",
+  "preferNameDirectory": true,
+  "symbols": {
+    "SliceVersion": {
+      "type": "parameter",
+      "datatype": "string",
+      "defaultValue": "0.1.0",
+      "replaces": "SLICE_VERSION",
+      "description": "Version of the Slice.* NuGet packages to reference."
+    }
+  }
+}

@@ -6,7 +6,7 @@
     <Version>0.1.0</Version>
     <Title>Slice framework templates</Title>
     <Authors>Slice</Authors>
-    <Description>dotnet new templates for the Slice framework: slice-api (host), slice-module (bounded context), slice-feature (vertical slice).</Description>
+    <Description>dotnet new templates for the Slice framework: slice-api (controller host), slice-api-minimal (minimal-API host), slice-module (bounded context), slice-monolith (modular-monolith solution), slice-worker (headless worker host), slice-tenant-api (database-per-tenant solution), slice-feature (vertical slice).</Description>
     <PackageTags>dotnet-new;templates;slice;vsa;ddd</PackageTags>
 
     <TargetFramework>net10.0</TargetFramework>
@@ -23,7 +23,11 @@
 
   <ItemGroup>
     <Content Include="api/**/*" Exclude="api/**/bin/**;api/**/obj/**" />
+    <Content Include="api-minimal/**/*" Exclude="api-minimal/**/bin/**;api-minimal/**/obj/**" />
     <Content Include="module/**/*" Exclude="module/**/bin/**;module/**/obj/**" />
+    <Content Include="monolith/**/*" Exclude="monolith/**/bin/**;monolith/**/obj/**" />
+    <Content Include="worker/**/*" Exclude="worker/**/bin/**;worker/**/obj/**" />
+    <Content Include="tenant-api/**/*" Exclude="tenant-api/**/bin/**;tenant-api/**/obj/**" />
     <Content Include="feature/**/*" Exclude="feature/**/bin/**;feature/**/obj/**" />
     <Compile Remove="**/*.cs" />
   </ItemGroup>

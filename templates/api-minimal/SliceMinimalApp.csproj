@@ -1,0 +1,26 @@
+<Project Sdk="Microsoft.NET.Sdk.Web">
+
+  <PropertyGroup>
+    <TargetFramework>net10.0</TargetFramework>
+    <Nullable>enable</Nullable>
+    <ImplicitUsings>enable</ImplicitUsings>
+    <ManagePackageVersionsCentrally>false</ManagePackageVersionsCentrally>
+    <RootNamespace>SliceMinimalApp</RootNamespace>
+  </PropertyGroup>
+
+  <ItemGroup>
+    <PackageReference Include="Slice.AspNetCore" Version="SLICE_VERSION" />
+    <PackageReference Include="Slice.AspNetCore.MinimalApi" Version="SLICE_VERSION" />
+    <PackageReference Include="Slice.AspNetCore.Hypermedia" Version="SLICE_VERSION" />
+    <PackageReference Include="Slice.AspNetCore.ConditionalRequests" Version="SLICE_VERSION" />
+    <PackageReference Include="Slice.ApiVersioning" Version="SLICE_VERSION" />
+    <PackageReference Include="Slice.Application" Version="SLICE_VERSION" />
+    <PackageReference Include="Slice.Domain" Version="SLICE_VERSION" />
+    <PackageReference Include="Slice.Mediator.Default" Version="SLICE_VERSION" />
+    <PackageReference Include="Slice.Modularity" Version="SLICE_VERSION" />
+    <PackageReference Include="Slice.EntityFrameworkCore" Version="SLICE_VERSION" />
+    <PackageReference Include="Slice.Authorization" Version="SLICE_VERSION" />
+    <PackageReference Include="Microsoft.EntityFrameworkCore.Sqlite" Version="10.0.0" />
+  </ItemGroup>
+
+</Project>

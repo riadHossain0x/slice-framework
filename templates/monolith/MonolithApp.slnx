@@ -1,0 +1,6 @@
+<Solution>
+  <Project Path="MonolithApp.Contracts/MonolithApp.Contracts.csproj" />
+  <Project Path="MonolithApp.Orders/MonolithApp.Orders.csproj" />
+  <Project Path="MonolithApp.Billing/MonolithApp.Billing.csproj" />
+  <Project Path="MonolithApp.Host/MonolithApp.Host.csproj" />
+</Solution>

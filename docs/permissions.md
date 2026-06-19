@@ -33,7 +33,10 @@ public sealed class CrmPermissionDefinitionProvider : PermissionDefinitionProvid
 }
 ```
 
-The hierarchy (children under `view`) is for grouping/UI only — checks are by **exact name**.
+The hierarchy (children under `view`) is for grouping/UI only — checks are by **exact name**. A group can
+also be tied to a feature — `context.AddGroup("Crm").RequireFeature("Crm")` — so the
+[app-config endpoint](cross-cutting-services.md#features) hides the group's permissions for tenants
+without that feature (runtime access is still gated by `[RequiresFeature]`).
 
 ## 2. Require it on a use case
 

@@ -37,14 +37,15 @@ public sealed class PermissionDefinitionManager(IEnumerable<PermissionDefinition
             provider.Define(context);
 
         var flat = new Dictionary<string, PermissionDefinition>(StringComparer.Ordinal);
-        void Walk(PermissionDefinition p)
+        void Walk(PermissionDefinition p, string? inheritedFeature)
         {
+            p.ApplyInheritedFeature(inheritedFeature);   // own feature wins; else inherit from parent/group
             flat[p.Name] = p;
-            foreach (var c in p.Children) Walk(c);
+            foreach (var c in p.Children) Walk(c, p.RequiredFeature);
         }
         foreach (var group in context._building)
             foreach (var p in group.Permissions)
-                Walk(p);
+                Walk(p, group.RequiredFeature);
 
         return (context._building, flat);
     }

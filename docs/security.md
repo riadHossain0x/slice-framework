@@ -107,6 +107,19 @@ public sealed class CrmPermissionDefinitionProvider : PermissionDefinitionProvid
 `PermissionDefinitionProvider` subclasses are discovered automatically (the convention registrar
 registers them against the abstract base). `IPermissionDefinitionManager` aggregates all definitions.
 
+A group (or individual permission) can be tied to a **feature** so a disabled module's permissions don't
+surface for a tenant that lacks it:
+
+```csharp
+context.AddGroup("Sales").RequireFeature("Sales").AddPermission("Sales.Orders.Create", "Create orders");
+```
+
+Permissions inherit their group's `RequiredFeature` (exposed on `IPermissionDefinitionManager`). This is
+**metadata for visibility/filtering** — the [`GET /api/app-config`](../src/Slice.AspNetCore.AppConfig/README.md)
+endpoint omits permissions (and menu items) whose feature is disabled for the current tenant. Runtime
+**enforcement** is still `[RequiresFeature]` / the module-level gate (`services.RequireFeature<TModule>(...)`)
+— see [cross-cutting services → Features](cross-cutting-services.md#features).
+
 ### Enforcing a permission
 
 Annotate the command/query; `AuthorizationBehavior` (pipeline order 300) enforces it before the

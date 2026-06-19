@@ -300,7 +300,15 @@ Permissions are checked against an `IPermissionStore`, layered:
    grants per user/role, effective immediately on the same token**.
 
 `Slice.Management` also adds tenant, setting, and feature management plus admin controllers
-(`api/management/permissions|tenants|identity`) and seeds every declared permission to the `admin` role.
+(`api/management/permissions|tenants|identity|settings|features`) and seeds every declared permission to
+the `admin` role.
+
+Permission groups can be **feature-gated** (`context.AddGroup("Sales").RequireFeature("Sales")`), and a
+whole module can be gated in one line (`services.RequireFeature<SalesModule>("Sales")`). The
+[`GET /api/app-config`](src/Slice.AspNetCore.AppConfig/README.md) endpoint then returns, per user/tenant,
+the **feature-filtered** granted permissions + enabled features + a permission/feature-filtered **menu** —
+so a tenant without a module never sees its permissions or nav (see
+[cross-cutting services → feature-based module entitlement](docs/cross-cutting-services.md)).
 
 → Deep dives: [**Security**](docs/security.md) · [**Permissions walkthrough**](docs/permissions.md)
 
@@ -445,7 +453,8 @@ annotated reference with summaries is in [**docs/README.md → Package reference
 [AspNetCore.SignalR](src/Slice.AspNetCore.SignalR/README.md) ·
 [AspNetCore.Hypermedia](src/Slice.AspNetCore.Hypermedia/README.md) ·
 [AspNetCore.ConditionalRequests](src/Slice.AspNetCore.ConditionalRequests/README.md) ·
-[AspNetCore.MinimalApi](src/Slice.AspNetCore.MinimalApi/README.md)
+[AspNetCore.MinimalApi](src/Slice.AspNetCore.MinimalApi/README.md) ·
+[AspNetCore.AppConfig](src/Slice.AspNetCore.AppConfig/README.md)
 
 **Persistence** — [EntityFrameworkCore](src/Slice.EntityFrameworkCore/README.md) ·
 [Dapper](src/Slice.Dapper/README.md) · [LinqToDB](src/Slice.LinqToDB/README.md)

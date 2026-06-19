@@ -123,6 +123,7 @@ behind a seam via a `RemoveAll<T>()` + `Add…` registration.
 | `Slice.AspNetCore.Hypermedia` | HAL `_links`/`_embedded`, content-negotiated + permission-aware | [↗](../src/Slice.AspNetCore.Hypermedia/README.md) |
 | `Slice.AspNetCore.ConditionalRequests` | `ETag`/`If-None-Match` → 304, `If-Match` → 412 | [↗](../src/Slice.AspNetCore.ConditionalRequests/README.md) |
 | `Slice.AspNetCore.MinimalApi` | Minimal-API endpoints: `ISliceEndpoint`, `Result`→HTTP mapping, OpenAPI | [↗](../src/Slice.AspNetCore.MinimalApi/README.md) |
+| `Slice.AspNetCore.AppConfig` | `GET /api/app-config`: feature-filtered permissions + menu + settings for the frontend | [↗](../src/Slice.AspNetCore.AppConfig/README.md) |
 
 ### Persistence
 | Package | Summary | README |

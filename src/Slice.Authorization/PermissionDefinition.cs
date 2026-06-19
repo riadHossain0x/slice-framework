@@ -19,6 +19,23 @@ public sealed class PermissionDefinition
     public bool GrantedByDefault { get; }
     public IReadOnlyList<PermissionDefinition> Children => _children;
 
+    /// <summary>
+    /// The feature this permission depends on (inherited from its group unless overridden). Metadata
+    /// only — it doesn't enforce anything at runtime (use <c>[RequiresFeature]</c> for that); consumers
+    /// such as the app-config endpoint use it to hide a disabled module's permissions from a tenant.
+    /// </summary>
+    public string? RequiredFeature { get; private set; }
+
+    /// <summary>Ties this permission to a feature (overrides any inherited from the group). Chainable.</summary>
+    public PermissionDefinition RequireFeature(string feature)
+    {
+        RequiredFeature = feature;
+        return this;
+    }
+
+    /// <summary>Applies an inherited feature only when none was set explicitly.</summary>
+    internal void ApplyInheritedFeature(string? feature) => RequiredFeature ??= feature;
+
     public PermissionDefinition AddChild(string name, string? displayName = null, bool grantedByDefault = false)
     {
         var child = new PermissionDefinition(name, displayName, grantedByDefault);
@@ -41,6 +58,16 @@ public sealed class PermissionGroupDefinition
     public string Name { get; }
     public string DisplayName { get; }
     public IReadOnlyList<PermissionDefinition> Permissions => _permissions;
+
+    /// <summary>A feature that gates this whole group; every permission in it inherits the requirement.</summary>
+    public string? RequiredFeature { get; private set; }
+
+    /// <summary>Gates the whole group behind a feature (its permissions inherit it). Chainable.</summary>
+    public PermissionGroupDefinition RequireFeature(string feature)
+    {
+        RequiredFeature = feature;
+        return this;
+    }
 
     public PermissionDefinition AddPermission(string name, string? displayName = null, bool grantedByDefault = false)
     {

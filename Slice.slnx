@@ -22,6 +22,7 @@
     <Project Path="src/Slice.AspNetCore.Hypermedia/Slice.AspNetCore.Hypermedia.csproj" />
     <Project Path="src/Slice.AspNetCore.ConditionalRequests/Slice.AspNetCore.ConditionalRequests.csproj" />
     <Project Path="src/Slice.AspNetCore.MinimalApi/Slice.AspNetCore.MinimalApi.csproj" />
+    <Project Path="src/Slice.AspNetCore.AppConfig/Slice.AspNetCore.AppConfig.csproj" />
     <Project Path="src/Slice.Authentication/Slice.Authentication.csproj" />
     <Project Path="src/Slice.Authorization/Slice.Authorization.csproj" />
     <Project Path="src/Slice.BackgroundJobs.Hangfire/Slice.BackgroundJobs.Hangfire.csproj" />
@@ -74,6 +75,8 @@
   <Folder Name="/tests/">
     <Project Path="tests/Slice.Architecture.Tests/Slice.Architecture.Tests.csproj" />
     <Project Path="tests/Slice.Templates.Tests/Slice.Templates.Tests.csproj" />
+    <Project Path="tests/Slice.AppConfig.Tests/Slice.AppConfig.Tests.csproj" />
+    <Project Path="tests/Slice.Features.Tests/Slice.Features.Tests.csproj" />
     <Project Path="tests/Slice.AspNetCore.SignalR.Tests/Slice.AspNetCore.SignalR.Tests.csproj" />
     <Project Path="tests/Slice.AspNetCore.Rest.Tests/Slice.AspNetCore.Rest.Tests.csproj" />
     <Project Path="tests/Slice.Data.Tests/Slice.Data.Tests.csproj" />

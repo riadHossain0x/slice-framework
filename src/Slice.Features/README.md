@@ -41,7 +41,9 @@ public sealed class SliceFeaturesModule : SliceModule
 | `ConfigurationFeatureStore` | sealed (`ISingletonDependency`) | Default store; reads `Features:{name}` from `IConfiguration`. |
 | `IFeatureChecker` / `FeatureChecker` | interface / sealed (`ITransientDependency`) | `Task<string?> GetOrNullAsync(string name)` (store value, else definition default), `Task<bool> IsEnabledAsync(string name)` (true when value equals `"true"`, case-insensitive). |
 | `RequiresFeatureAttribute` | sealed `Attribute` | `[RequiresFeature("...")]` on a request class; `AllowMultiple = true`, `Inherited = true`. Exposes `Feature`. |
-| `RequiresFeatureBehavior<TRequest, TResponse>` | sealed pipeline behavior (`IHasPipelineOrder`) | Reads the request's `RequiresFeature` attributes and short-circuits to `Error.Forbidden("Features:Disabled", ...)` if any required feature is disabled. `Order => PipelineOrder.FeatureCheck`. |
+| `RequiresFeatureBehavior<TRequest, TResponse>` | sealed pipeline behavior (`IHasPipelineOrder`) | Enforces the union of the request's `RequiresFeature` attributes and any module-level requirement for the request's assembly; short-circuits to `Error.Forbidden("Features:Disabled", ...)` if any required feature is disabled. `Order => PipelineOrder.FeatureCheck`. |
+| `IModuleFeatureRegistry` / `ModuleFeatureRegistry` | interface / `ISingletonDependency` | The set of features required for each module assembly (built from registered `ModuleFeatureRequirement`s). |
+| `ModuleFeatureGating.RequireFeature<TModule>` / `RequireFeatureForAssembly` | extension | One-line module gate: `services.RequireFeature<SalesModule>("Sales")` makes every request in that module's assembly require the feature (composes with per-slice `[RequiresFeature]`). |
 
 ## Usage
 

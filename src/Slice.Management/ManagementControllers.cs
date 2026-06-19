@@ -45,6 +45,54 @@ public sealed class TenantManagementController(ITenantManager tenants) : SliceCo
         => Ok(await tenants.CreateAsync(r.Name, r.ConnectionString, ct));
 }
 
+public sealed record SetValueRequest(string Name, string? Value, string ProviderName, string? ProviderKey = null);
+
+[Authorize]
+[Route("api/management/features")]
+public sealed class FeatureManagementController(IFeatureValueManager features) : SliceController
+{
+    [HttpGet]
+    public async Task<IActionResult> Get(string name, string providerName, string? providerKey, CancellationToken ct)
+        => Ok(await features.GetAsync(name, providerName, providerKey, ct));
+
+    [HttpPut]
+    public async Task<IActionResult> Set([FromBody] SetValueRequest r, CancellationToken ct)
+    {
+        await features.SetAsync(r.Name, r.Value, r.ProviderName, r.ProviderKey, ct);
+        return Ok();
+    }
+
+    [HttpDelete]
+    public async Task<IActionResult> Clear(string name, string providerName, string? providerKey, CancellationToken ct)
+    {
+        await features.ClearAsync(name, providerName, providerKey, ct);
+        return Ok();
+    }
+}
+
+[Authorize]
+[Route("api/management/settings")]
+public sealed class SettingManagementController(ISettingValueManager settings) : SliceController
+{
+    [HttpGet]
+    public async Task<IActionResult> Get(string name, string providerName, string? providerKey, CancellationToken ct)
+        => Ok(await settings.GetAsync(name, providerName, providerKey, ct));
+
+    [HttpPut]
+    public async Task<IActionResult> Set([FromBody] SetValueRequest r, CancellationToken ct)
+    {
+        await settings.SetAsync(r.Name, r.Value, r.ProviderName, r.ProviderKey, ct);
+        return Ok();
+    }
+
+    [HttpDelete]
+    public async Task<IActionResult> Clear(string name, string providerName, string? providerKey, CancellationToken ct)
+    {
+        await settings.ClearAsync(name, providerName, providerKey, ct);
+        return Ok();
+    }
+}
+
 public sealed record CreateUserRequest(string Email, string Password, string? Role);
 public sealed record CreateRoleRequest(string Name);
 

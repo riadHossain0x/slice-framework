@@ -1,0 +1,18 @@
+<Project Sdk="Microsoft.NET.Sdk">
+
+  <ItemGroup>
+    <FrameworkReference Include="Microsoft.AspNetCore.App" />
+    <ProjectReference Include="..\Slice.AspNetCore\Slice.AspNetCore.csproj" />
+    <ProjectReference Include="..\Slice.Authorization\Slice.Authorization.csproj" />
+    <ProjectReference Include="..\Slice.Features\Slice.Features.csproj" />
+    <ProjectReference Include="..\Slice.Settings\Slice.Settings.csproj" />
+    <ProjectReference Include="..\Slice.Modularity\Slice.Modularity.csproj" />
+  </ItemGroup>
+
+  <PropertyGroup>
+    <TargetFramework>net10.0</TargetFramework>
+    <ImplicitUsings>enable</ImplicitUsings>
+    <Nullable>enable</Nullable>
+  </PropertyGroup>
+
+</Project>

@@ -31,8 +31,8 @@ public sealed class MyAppModule : SliceModule { }
 | `IPermissionStore` | `interface` | Source of grants for the current caller (pluggable: config, EF, roles…). |
 | `ConfigurationPermissionStore` | `sealed class`, `ISingletonDependency` | Default store; grants permissions listed under `Authorization:GrantedPermissions` plus any `GrantedByDefault`. |
 | `SlicePermissionAttribute` | `sealed class : Attribute` | `[SlicePermission("...")]`; `AttributeUsage(Class, AllowMultiple=true, Inherited=true)`; exposes `Permission`. |
-| `PermissionDefinition` | `sealed class` | A single permission; `Name`, `DisplayName`, `GrantedByDefault`, `Children`, `AddChild(...)`. |
-| `PermissionGroupDefinition` | `sealed class` | A named group; `Name`, `DisplayName`, `Permissions`, `AddPermission(...)`. |
+| `PermissionDefinition` | `sealed class` | A single permission; `Name`, `DisplayName`, `GrantedByDefault`, `Children`, `AddChild(...)`, `RequireFeature(feature)` + `RequiredFeature` (inherited from its group). |
+| `PermissionGroupDefinition` | `sealed class` | A named group; `Name`, `DisplayName`, `Permissions`, `AddPermission(...)`, `RequireFeature(feature)` + `RequiredFeature` (gates the whole group; permissions inherit it). |
 | `IPermissionDefinitionContext` | `interface` | `AddGroup(string name, string? displayName = null)`. |
 | `PermissionDefinitionProvider` | `abstract class`, `ITransientDependency` | Implement `Define(IPermissionDefinitionContext)` to declare a module's permissions. |
 | `IPermissionDefinitionManager` | `interface` | `GetGroups()`, `Find(string)`, `GetPermissions()` — aggregated/flattened view. |
@@ -73,3 +73,4 @@ When the caller lacks the permission, the behavior returns
 - **Short-circuiting:** the first missing permission produces `Error.Forbidden(...)` via `ResultFactory.FailureOrThrow<TResponse>` — no handler is invoked.
 - **Default store is config-only:** `ConfigurationPermissionStore` reads `Authorization:GrantedPermissions` (string array) once at construction and adds every `GrantedByDefault` permission. It is registered as a singleton; real apps replace it with a role/user/tenant-backed `IPermissionStore` (e.g. the claims store from `Slice.Authentication` or the DB store from `Slice.Management`, both registered later so they win).
 - `PermissionDefinitionManager` builds its model lazily and caches it (`Lazy<>`), so providers are evaluated once.
+- **Feature-gated permissions:** `RequireFeature(...)` on a group/permission is **metadata only** (each permission's effective `RequiredFeature` is its own ?? its group's). It doesn't enforce anything — runtime gating is `[RequiresFeature]` (`Slice.Features`). Consumers like the app-config endpoint use it to hide a disabled module's permissions per tenant.

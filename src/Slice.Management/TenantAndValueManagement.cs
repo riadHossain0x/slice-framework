@@ -115,3 +115,75 @@ public sealed class ManagementFeatureStore(SliceManagementDbContext db, ICurrent
             ?? configuration[$"Features:{name}"];
     }
 }
+
+// ── Setting-value administration (write side for SliceSettingValues) ─────────
+/// <summary>Manages DB-backed setting values per scope ("G" global / "T" tenant / "U" user).</summary>
+public interface ISettingValueManager
+{
+    Task SetAsync(string name, string? value, string providerName, string? providerKey, CancellationToken ct = default);
+    Task ClearAsync(string name, string providerName, string? providerKey, CancellationToken ct = default);
+    Task<string?> GetAsync(string name, string providerName, string? providerKey, CancellationToken ct = default);
+}
+
+public sealed class SettingValueManager(SliceManagementDbContext db, IGuidGenerator guids)
+    : ISettingValueManager, IScopedDependency
+{
+    public async Task SetAsync(string name, string? value, string providerName, string? providerKey, CancellationToken ct = default)
+    {
+        var row = await db.SettingValues.FirstOrDefaultAsync(
+            s => s.Name == name && s.ProviderName == providerName && s.ProviderKey == providerKey, ct);
+        if (row is null)
+            db.SettingValues.Add(new SettingValueRecord
+            { Id = guids.Create(), Name = name, Value = value, ProviderName = providerName, ProviderKey = providerKey });
+        else
+            row.Value = value;
+        await db.SaveChangesAsync(ct);
+    }
+
+    public async Task ClearAsync(string name, string providerName, string? providerKey, CancellationToken ct = default)
+        => await db.SettingValues
+            .Where(s => s.Name == name && s.ProviderName == providerName && s.ProviderKey == providerKey)
+            .ExecuteDeleteAsync(ct);
+
+    public Task<string?> GetAsync(string name, string providerName, string? providerKey, CancellationToken ct = default)
+        => db.SettingValues
+            .Where(s => s.Name == name && s.ProviderName == providerName && s.ProviderKey == providerKey)
+            .Select(s => s.Value)
+            .FirstOrDefaultAsync(ct);
+}
+
+// ── Feature-value administration (write side for SliceFeatureValues) ─────────
+/// <summary>Manages DB-backed feature values per scope ("G" global / "T" tenant).</summary>
+public interface IFeatureValueManager
+{
+    Task SetAsync(string name, string? value, string providerName, string? providerKey, CancellationToken ct = default);
+    Task ClearAsync(string name, string providerName, string? providerKey, CancellationToken ct = default);
+    Task<string?> GetAsync(string name, string providerName, string? providerKey, CancellationToken ct = default);
+}
+
+public sealed class FeatureValueManager(SliceManagementDbContext db, IGuidGenerator guids)
+    : IFeatureValueManager, IScopedDependency
+{
+    public async Task SetAsync(string name, string? value, string providerName, string? providerKey, CancellationToken ct = default)
+    {
+        var row = await db.FeatureValues.FirstOrDefaultAsync(
+            f => f.Name == name && f.ProviderName == providerName && f.ProviderKey == providerKey, ct);
+        if (row is null)
+            db.FeatureValues.Add(new FeatureValueRecord
+            { Id = guids.Create(), Name = name, Value = value, ProviderName = providerName, ProviderKey = providerKey });
+        else
+            row.Value = value;
+        await db.SaveChangesAsync(ct);
+    }
+
+    public async Task ClearAsync(string name, string providerName, string? providerKey, CancellationToken ct = default)
+        => await db.FeatureValues
+            .Where(f => f.Name == name && f.ProviderName == providerName && f.ProviderKey == providerKey)
+            .ExecuteDeleteAsync(ct);
+
+    public Task<string?> GetAsync(string name, string providerName, string? providerKey, CancellationToken ct = default)
+        => db.FeatureValues
+            .Where(f => f.Name == name && f.ProviderName == providerName && f.ProviderKey == providerKey)
+            .Select(f => f.Value)
+            .FirstOrDefaultAsync(ct);
+}

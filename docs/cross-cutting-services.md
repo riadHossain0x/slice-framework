@@ -62,6 +62,49 @@ A disabled feature short-circuits to `Error.Forbidden("Features:Disabled", …)`
 from `IFeatureStore`: DB (management, tenant → global) → `Features:{name}` configuration → default.
 Check imperatively with `IFeatureChecker.IsEnabledAsync(name)`.
 
+The attribute goes on the **request** (command/query), so it gates both controllers and minimal-API
+endpoints (they all dispatch through `ISender`). To gate a **whole module** without annotating every
+slice, register it once in the module — every request in that module's **assembly** then requires the
+feature (it composes with any per-slice `[RequiresFeature]`):
+
+```csharp
+public override void ConfigureServices(ServiceConfigurationContext context)
+    => context.Services.RequireFeature<SalesModule>("Sales");   // gates the whole Sales module
+```
+
+(Keyed on the request type's assembly — the module-per-project convention. In a single-project app where
+"modules" are namespaces, use the per-slice attribute instead.)
+
+### Managing setting & feature values (DB)
+
+`Slice.Management` exposes write-side managers for the DB-backed value tables, plus admin endpoints
+(`api/management/settings`, `api/management/features` — `GET`/`PUT`/`DELETE`):
+
+```csharp
+await featureValues.SetAsync("Sales", "true", providerName: "T", providerKey: tenantId.ToString());  // enable per tenant
+await featureValues.ClearAsync("Sales", "T", tenantId.ToString());                                    // back to default
+await settingValues.SetAsync("Crm.MaxLeadsPerDay", "45", "T", tenantId.ToString());
+```
+Provider scopes: settings `G`/`T`/`U`, features `G`/`T`.
+
+### Feature-based module entitlement per tenant
+
+Combine the two to grant **whole modules** to specific tenants in a modular app:
+
+1. Each module declares a feature (`FeatureDefinitionProvider`) and gates its slices with
+   `[RequiresFeature("Sales")]` (runtime 403 when off).
+2. Tie the module's **permission group** to the same feature so its permissions don't surface for tenants
+   that lack it: `context.AddGroup("Sales").RequireFeature("Sales").AddPermission("Sales.Orders.Create")`.
+   Permissions inherit the group's `RequiredFeature` (exposed on `IPermissionDefinitionManager`).
+3. Enable per tenant with `IFeatureValueManager.SetAsync("Sales", "true", "T", tenantId)`.
+
+The [`GET /api/app-config`](../src/Slice.AspNetCore.AppConfig/README.md) endpoint
+(`Slice.AspNetCore.AppConfig`) then returns, per user/tenant, the **feature-filtered** granted permissions
++ enabled features + a permission/feature-filtered **menu** (`IMenuContributor`) + current user/tenant +
+client-visible settings — so a tenant without the Sales feature never sees its permissions or nav. (The
+`[RequiresFeature]`/`[SlicePermission]` pipeline gates still enforce access regardless; this is the
+visibility/composition layer.)
+
 ---
 
 ## Localization

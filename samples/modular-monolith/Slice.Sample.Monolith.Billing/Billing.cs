@@ -8,10 +8,23 @@ using Slice.Core.Ambient;
 using Slice.Core.Results;
 using Slice.EntityFrameworkCore;
 using Slice.EventBus;
+using Slice.Features;
 using Slice.LinqToDB;
 using Slice.Sample.Monolith.Contracts;
 
 namespace Slice.Sample.Monolith.Billing;
+
+/// <summary>The feature that gates the whole Billing module (enabled by default).</summary>
+public static class BillingFeatures
+{
+    public const string Billing = "Billing";
+}
+
+public sealed class BillingFeatureDefinitionProvider : FeatureDefinitionProvider
+{
+    public override void Define(IFeatureDefinitionContext context)
+        => context.Add(new FeatureDefinition(BillingFeatures.Billing, defaultValue: "true", displayName: "Billing module"));
+}
 
 // Invoice is a downstream projection (not a rich aggregate). It carries LinqToDB mapping attributes so
 // LinqToDB reads/writes it; EF maps the same table (below) only so EnsureCreated provisions it.
@@ -45,12 +58,21 @@ public sealed class CreateInvoiceOnOrderPlaced(
     ISliceDataConnectionFactory<BillingDbContext> linq2db,
     IDistributedEventBus bus,
     IGuidGenerator guids,
+    IFeatureChecker featureChecker,
     ILogger<CreateInvoiceOnOrderPlaced> logger) : IDistributedEventHandler<OrderPlacedEto>
 {
     private const decimal UnitPrice = 9.99m;
 
     public async Task HandleAsync(OrderPlacedEto @event, CancellationToken ct)
     {
+        // Distributed-event handlers bypass the mediator pipeline, so the module/attribute feature gates
+        // don't apply here — guard the handler explicitly.
+        if (!await featureChecker.IsEnabledAsync(BillingFeatures.Billing))
+        {
+            logger.LogInformation("BILLING disabled — skipping invoice for order {Order}", @event.OrderId);
+            return;
+        }
+
         var invoice = new Invoice
         {
             Id = guids.Create(),

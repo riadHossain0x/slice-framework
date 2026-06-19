@@ -44,9 +44,12 @@ services.AddSliceManagementStore(b => b.UseSqlite("Data Source=management.db"));
 | `TenantDatabaseMigratorRegistration` | `static class` | `AddSliceTenantDatabaseMigrator<TContext>(this IServiceCollection)` — registers the migrator for the per-tenant context. |
 | `ManagementSettingValueProvider` | `sealed class`, `ISettingValueProvider`, `IScopedDependency` | `Order = -10`; resolves U → T → G. |
 | `ManagementFeatureStore` | `sealed class`, `IFeatureStore`, `IScopedDependency` | Resolves T → G → `Features:{name}` config. |
+| `ISettingValueManager` / `SettingValueManager` | `interface` / `sealed class`, `IScopedDependency` | Write side for `SliceSettingValues`: `SetAsync`/`ClearAsync`/`GetAsync(name, providerName "G"/"T"/"U", providerKey?)`. |
+| `IFeatureValueManager` / `FeatureValueManager` | `interface` / `sealed class`, `IScopedDependency` | Write side for `SliceFeatureValues`: `SetAsync`/`ClearAsync`/`GetAsync(name, providerName "G"/"T", providerKey?)`. |
 | `PermissionManagementController` | `sealed class : SliceController` | `[Authorize]`, route `api/management/permissions`. |
 | `TenantManagementController` | `sealed class : SliceController` | `[Authorize]`, route `api/management/tenants`. |
 | `IdentityManagementController` | `sealed class : SliceController` | `[Authorize]`, route `api/management/identity`. |
+| `FeatureManagementController` / `SettingManagementController` | `sealed class : SliceController` | `[Authorize]`, routes `api/management/features` / `api/management/settings` — `GET`/`PUT`/`DELETE` over the value managers. |
 | `SliceManagementModule` | `sealed class : SliceModule` | Wires the module and seeds admin grants. |
 | `SliceManagementRegistration` | `static class` | `AddSliceManagementStore(this IServiceCollection, Action<DbContextOptionsBuilder>)`. |
 
@@ -70,6 +73,14 @@ Create a tenant, role, or user:
 POST /api/management/tenants        { "name": "acme" }
 POST /api/management/identity/roles { "name": "manager" }
 POST /api/management/identity/users { "email": "u@acme", "password": "P@ss!", "role": "manager" }
+```
+
+Set/clear feature & setting values per scope (`G` global / `T` tenant / `U` user):
+
+```http
+PUT    /api/management/features  { "name": "Sales", "value": "true", "providerName": "T", "providerKey": "<tenantId>" }
+DELETE /api/management/features?name=Sales&providerName=T&providerKey=<tenantId>
+PUT    /api/management/settings  { "name": "Crm.MaxLeadsPerDay", "value": "45", "providerName": "T", "providerKey": "<tenantId>" }
 ```
 
 Programmatically:

@@ -2,6 +2,7 @@
 
   <ItemGroup>
     <ProjectReference Include="..\Slice.Core\Slice.Core.csproj" />
+    <ProjectReference Include="..\Slice.Domain\Slice.Domain.csproj" />
     <ProjectReference Include="..\Slice.Modularity\Slice.Modularity.csproj" />
     <ProjectReference Include="..\Slice.Application\Slice.Application.csproj" />
     <ProjectReference Include="..\Slice.Authorization\Slice.Authorization.csproj" />
@@ -13,7 +14,14 @@
   </ItemGroup>
 
   <ItemGroup>
+    <!-- TenantIndexFilters is an implementation detail, but its per-provider SQL can't be covered
+         from outside without installing every provider — so the tests reach it directly. -->
+    <InternalsVisibleTo Include="Slice.Authentication.Tests" />
+  </ItemGroup>
+
+  <ItemGroup>
     <PackageReference Include="Microsoft.AspNetCore.Identity.EntityFrameworkCore" />
+    <PackageReference Include="Microsoft.AspNetCore.DataProtection.EntityFrameworkCore" />
     <PackageReference Include="OpenIddict.AspNetCore" />
     <PackageReference Include="OpenIddict.EntityFrameworkCore" />
   </ItemGroup>

@@ -31,13 +31,14 @@ app.UseSliceMultiTenancy();
 |---|---|---|
 | `CurrentTenant` | sealed class | `AsyncLocal`-backed `ICurrentTenant` (`ISingletonDependency`); `Change` pushes/restores the ambient tenant. |
 | `TenantInfo` | sealed record | Immutable ambient snapshot (`Id`, `Name`). |
-| `ITenantResolveContributor` | interface | One tenant-discovery strategy; mutates a `TenantResolveResult`. |
+| `ITenantResolveContributor` | interface | One tenant-discovery strategy; mutates a `TenantResolveResult`. `int Order` (defaulted) sets precedence. |
 | `ITenantResolver` | interface | Runs contributors in order; first to resolve wins. |
 | `TenantResolver` | sealed class | Default resolver (`ITransientDependency`) over the registered contributors. |
 | `TenantResolveResult` | sealed class | Carries the resolved `TenantId`; `Resolved` is `true` once set. |
 | `ClaimTenantResolveContributor` | sealed class | Resolves from the `tenant_id` claim (`ITransientDependency`). |
 | `HeaderTenantResolveContributor` | sealed class | Resolves from the `X-Tenant-Id` request header (`ITransientDependency`). |
-| `TenantConstants` | static class | `Header = "X-Tenant-Id"`, `Claim = "tenant_id"`. |
+| `TenantConstants` | static class | `Header = "X-Tenant-Id"`, `Claim = "tenant_id"` (= `Slice.Domain.MultiTenancy.MultiTenancyClaims.TenantId`, shared with `Slice.Authentication`). |
+| `TenantResolveOrder` | static class | `Claim = 100`, `Default = 500`, `Header = 900` — contributor precedence, ordered by how forgeable the source is. |
 | `MultiTenancyMiddleware` | sealed class | Resolves the tenant per request and pushes it onto `ICurrentTenant`. |
 | `MultiTenancyMiddlewareExtensions` | static class | `UseSliceMultiTenancy()` extension. |
 | `MultiTenancyBehavior<TRequest, TResponse>` | sealed class | Mediator pipeline behavior (order `PipelineOrder.MultiTenancy`) that resolves a tenant when none is ambient. |
@@ -68,7 +69,7 @@ public sealed class ReportHandler(ICurrentTenant currentTenant) /* ... */
 
 `MultiTenancyMiddleware` runs `ITenantResolver.ResolveAsync` for each request and wraps the rest of the pipeline in `currentTenant.Change(result.TenantId)`. For requests that arrive without HTTP middleware, `MultiTenancyBehavior` does the same around the mediator handler — but only when no tenant is already ambient and only if resolution succeeds.
 
-Adding a custom contributor (e.g. subdomain) means implementing `ITenantResolveContributor`; contributors run in registration order and the first to set `TenantId` wins.
+Adding a custom contributor (e.g. subdomain) means implementing `ITenantResolveContributor`; contributors run in `Order` (lower first) and the first to set `TenantId` wins. That makes the order a **trust ordering**: the signed `tenant_id` claim (`TenantResolveOrder.Claim`, 100) runs ahead of the caller-supplied `X-Tenant-Id` header (`TenantResolveOrder.Header`, 900), so an authenticated user can't relocate themselves into another tenant — and past every `IMultiTenant` query filter — by setting a header. Give a custom contributor an `Order` that reflects how forgeable its source is; it defaults to `TenantResolveOrder.Default` (500).
 
 ## Notes
 

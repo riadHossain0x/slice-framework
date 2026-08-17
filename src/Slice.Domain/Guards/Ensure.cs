@@ -26,9 +26,15 @@ public static class Ensure
     public static int Positive(int value, string parameterName)
         => value > 0 ? value : throw new AppValidationException($"'{parameterName}' must be positive.");
 
-    public static void Range<T>(T value, T min, T max, string parameterName) where T : IComparable<T>
+    /// <summary>
+    /// Returns <paramref name="value"/> so it can be used inline in an assignment, matching
+    /// <see cref="NotNull"/>/<see cref="NotNullOrWhiteSpace"/>/<see cref="Positive"/>. Widening the
+    /// old <c>void</c> return is source-compatible — callers that ignore the result still compile.
+    /// </summary>
+    public static T Range<T>(T value, T min, T max, string parameterName) where T : IComparable<T>
     {
         if (value.CompareTo(min) < 0 || value.CompareTo(max) > 0)
             throw new AppValidationException($"'{parameterName}' must be between {min} and {max}.");
+        return value;
     }
 }

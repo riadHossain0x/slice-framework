@@ -16,7 +16,12 @@ public static class SliceAuthDataSeeder
     {
         var options = serviceProvider.GetRequiredService<SliceAuthOptions>();
         var db = serviceProvider.GetRequiredService<SliceAuthDbContext>();
-        await db.Database.EnsureCreatedAsync();
+
+        // Skipped when the host owns the schema (its own migrations). EnsureCreated is a no-op once
+        // the database exists, so leaving it on there would quietly do nothing while looking like
+        // schema management. See SliceAuthOptions.AutoCreateSchema.
+        if (options.AutoCreateSchema)
+            await db.Database.EnsureCreatedAsync();
 
         if (!options.SeedDemoAdmin)
             return;
@@ -24,11 +29,16 @@ public static class SliceAuthDataSeeder
         var roleManager = serviceProvider.GetRequiredService<RoleManager<SliceRole>>();
         var userManager = serviceProvider.GetRequiredService<UserManager<SliceUser>>();
         var permissions = serviceProvider.GetRequiredService<IPermissionDefinitionManager>();
+        var tenantRoleAssigner = serviceProvider.GetRequiredService<ITenantRoleAssigner>();
 
-        var role = await roleManager.FindByNameAsync(options.AdminRole);
+        // This seeded role/user are always platform-tier (TenantId == null) — the demo admin isn't
+        // scoped to any tenant. Resolved by (TenantId == null, NormalizedName) rather than
+        // FindByNameAsync, since role names are no longer globally unique once tenants exist.
+        var role = await roleManager.Roles.SingleOrDefaultAsync(
+            r => r.NormalizedName == roleManager.KeyNormalizer.NormalizeName(options.AdminRole) && r.TenantId == null);
         if (role is null)
         {
-            role = new SliceRole { Name = options.AdminRole };
+            role = new SliceRole { Name = options.AdminRole, TenantId = null };
             await roleManager.CreateAsync(role);
         }
 
@@ -41,13 +51,18 @@ public static class SliceAuthDataSeeder
             if (existing.Add(permission.Name))
                 await roleManager.AddClaimAsync(role, new Claim(SliceClaims.Permission, permission.Name));
 
-        var user = await userManager.FindByEmailAsync(options.AdminEmail);
+        // Same rationale — resolve by (TenantId == null, NormalizedUserName), not FindByEmailAsync,
+        // since usernames are no longer globally unique once tenants exist. The demo admin's
+        // UserName is its email address, so the address is normalized as a user name here.
+        var normalizedUserName = userManager.NormalizeName(options.AdminEmail);
+        var user = await userManager.Users.SingleOrDefaultAsync(
+            u => u.NormalizedUserName == normalizedUserName && u.TenantId == null);
         if (user is null)
         {
-            user = new SliceUser { UserName = options.AdminEmail, Email = options.AdminEmail, EmailConfirmed = true };
+            user = new SliceUser { UserName = options.AdminEmail, Email = options.AdminEmail, EmailConfirmed = true, TenantId = null };
             var result = await userManager.CreateAsync(user, options.AdminPassword);
             if (result.Succeeded)
-                await userManager.AddToRoleAsync(user, options.AdminRole);
+                await tenantRoleAssigner.AddToRoleAsync(user, options.AdminRole);
         }
     }
 }

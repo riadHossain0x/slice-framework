@@ -79,14 +79,25 @@ public abstract class SliceDbContext : DbContext, IUnitOfWork
             b.HasKey(x => x.MessageId);
         });
 
+        // Every non-owned entity is offered to the filter builder, not just ISoftDelete/IMultiTenant
+        // ones — a derived context may add filters of its own via BuildAdditionalFilter, keyed on
+        // whatever marker interface it likes, and the framework can't know what that is.
+        // BuildFilter returns null when nothing applies, and no filter is registered in that case.
+        //
+        // Shared-CLR-type entity types are skipped. An implicit many-to-many join is modelled as a
+        // shared-type entity over Dictionary<string, object>, so ConfigureGlobalFilters would close over
+        // that dictionary type rather than the join entity — and if a derived context's
+        // BuildAdditionalFilter returned a filter for it, modelBuilder.Entity<Dictionary<string,
+        // object>>() fails the whole model build with "The entity type 'Dictionary<string, object>'
+        // cannot be added to the model because its CLR type has been configured as a shared type."
+        // Nothing is lost by not offering them: a shared-type entity has no CLR type of its own to
+        // carry a marker interface, so no filter could meaningfully key on it.
         foreach (var entityType in modelBuilder.Model.GetEntityTypes())
         {
-            if (entityType.IsOwned())
+            if (entityType.IsOwned() || entityType.HasSharedClrType)
                 continue;
 
-            var clr = entityType.ClrType;
-            if (typeof(ISoftDelete).IsAssignableFrom(clr) || typeof(IMultiTenant).IsAssignableFrom(clr))
-                ConfigureFiltersMethod.MakeGenericMethod(clr).Invoke(this, [modelBuilder]);
+            ConfigureFiltersMethod.MakeGenericMethod(entityType.ClrType).Invoke(this, [modelBuilder]);
         }
 
         // Map the ExtraProperties JSON column on every IHasExtraProperties entity (e.g. all aggregates).
@@ -99,6 +110,19 @@ public abstract class SliceDbContext : DbContext, IUnitOfWork
         if (filter is not null)
             modelBuilder.Entity<TEntity>().HasQueryFilter(filter);
     }
+
+    /// <summary>
+    /// An extra global query filter for <typeparamref name="TEntity"/>, ANDed with the built-in
+    /// soft-delete and multi-tenant ones. Return null (the default) for entities you don't filter.
+    ///
+    /// Called for every non-owned entity type in the model, so a derived context can key on any
+    /// marker interface it defines — row ownership, branch, archive state — without the framework
+    /// needing to know about it. Follow the same rule the built-ins do: reference context
+    /// <em>instance</em> members rather than captured values, so EF re-evaluates the filter per query
+    /// instead of baking a constant into the cached model. Pair it with an <see cref="IDataFilter"/>
+    /// toggle if callers need to disable it.
+    /// </summary>
+    protected virtual Expression<Func<TEntity, bool>>? BuildAdditionalFilter<TEntity>() where TEntity : class => null;
 
     private Expression<Func<TEntity, bool>>? BuildFilter<TEntity>() where TEntity : class
     {
@@ -113,6 +137,9 @@ public abstract class SliceDbContext : DbContext, IUnitOfWork
                 e => !IsMultiTenantFilterEnabled || EF.Property<Guid?>(e, "TenantId") == CurrentTenantId;
             filter = filter is null ? tenantFilter : Combine(filter, tenantFilter);
         }
+
+        if (BuildAdditionalFilter<TEntity>() is { } additional)
+            filter = filter is null ? additional : Combine(filter, additional);
 
         return filter;
     }

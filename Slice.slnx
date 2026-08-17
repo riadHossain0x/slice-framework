@@ -76,6 +76,7 @@
     <Project Path="tests/Slice.Architecture.Tests/Slice.Architecture.Tests.csproj" />
     <Project Path="tests/Slice.Templates.Tests/Slice.Templates.Tests.csproj" />
     <Project Path="tests/Slice.AppConfig.Tests/Slice.AppConfig.Tests.csproj" />
+    <Project Path="tests/Slice.Authentication.Tests/Slice.Authentication.Tests.csproj" />
     <Project Path="tests/Slice.Features.Tests/Slice.Features.Tests.csproj" />
     <Project Path="tests/Slice.AspNetCore.SignalR.Tests/Slice.AspNetCore.SignalR.Tests.csproj" />
     <Project Path="tests/Slice.AspNetCore.Rest.Tests/Slice.AspNetCore.Rest.Tests.csproj" />
@@ -84,6 +85,7 @@
     <Project Path="tests/Slice.Domain.Tests/Slice.Domain.Tests.csproj" />
     <Project Path="tests/Slice.Embeddings.OpenAI.Tests/Slice.Embeddings.OpenAI.Tests.csproj" />
     <Project Path="tests/Slice.Emailing.MailKit.Tests/Slice.Emailing.MailKit.Tests.csproj" />
+    <Project Path="tests/Slice.EventBus.Tests/Slice.EventBus.Tests.csproj" />
     <Project Path="tests/Slice.EventBus.Kafka.Tests/Slice.EventBus.Kafka.Tests.csproj" />
     <Project Path="tests/Slice.EventBus.RabbitMQ.Tests/Slice.EventBus.RabbitMQ.Tests.csproj" />
     <Project Path="tests/Slice.Mediator.Conformance.Tests/Slice.Mediator.Conformance.Tests.csproj" />

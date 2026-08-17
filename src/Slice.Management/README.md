@@ -48,7 +48,7 @@ services.AddSliceManagementStore(b => b.UseSqlite("Data Source=management.db"));
 | `IFeatureValueManager` / `FeatureValueManager` | `interface` / `sealed class`, `IScopedDependency` | Write side for `SliceFeatureValues`: `SetAsync`/`ClearAsync`/`GetAsync(name, providerName "G"/"T", providerKey?)`. |
 | `PermissionManagementController` | `sealed class : SliceController` | `[Authorize]`, route `api/management/permissions`. |
 | `TenantManagementController` | `sealed class : SliceController` | `[Authorize]`, route `api/management/tenants`. |
-| `IdentityManagementController` | `sealed class : SliceController` | `[Authorize]`, route `api/management/identity`. |
+| `IdentityManagementController` | `sealed class : SliceController` | `[Authorize]`, route `api/management/identity`. Tenant-aware: stamps `ICurrentTenant.Id` onto every user/role it creates and resolves roles via `ITenantRoleAssigner`. |
 | `FeatureManagementController` / `SettingManagementController` | `sealed class : SliceController` | `[Authorize]`, routes `api/management/features` / `api/management/settings` — `GET`/`PUT`/`DELETE` over the value managers. |
 | `SliceManagementModule` | `sealed class : SliceModule` | Wires the module and seeds admin grants. |
 | `SliceManagementRegistration` | `static class` | `AddSliceManagementStore(this IServiceCollection, Action<DbContextOptionsBuilder>)`. |
@@ -73,6 +73,12 @@ Create a tenant, role, or user:
 POST /api/management/tenants        { "name": "acme" }
 POST /api/management/identity/roles { "name": "manager" }
 POST /api/management/identity/users { "email": "u@acme", "password": "P@ss!", "role": "manager" }
+
+# Platform-tier callers (no ambient tenant) may target a tenant explicitly; in-tenant callers cannot —
+# their own tenant always wins, so a tenant admin can't mint principals in another tenant or at the
+# platform tier. Omitting tenantId on a platform-tier call creates a platform-tier principal.
+POST /api/management/identity/users { "email": "u@acme", "password": "P@ss!", "role": "manager",
+                                      "tenantId": "6f9…" }
 ```
 
 Set/clear feature & setting values per scope (`G` global / `T` tenant / `U` user):

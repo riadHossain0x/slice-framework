@@ -184,7 +184,7 @@ services.AddSliceManagementStore(o => o.UseSqlite(config.GetConnectionString("Ma
 |---|---|
 | `api/management/permissions` | `GET` granted, `POST grant`, `POST revoke` (by `providerName`/`providerKey`/`permission`) |
 | `api/management/tenants` | `GET` list, `POST` create |
-| `api/management/identity` | `POST roles`, `POST users` (optionally assigning a role) |
+| `api/management/identity` | `POST roles`, `POST users` (optionally assigning a role). Both are tenant-scoped: the created principal belongs to `ICurrentTenant.Id`, and only a platform-tier caller may name a different tenant. |
 
 ```bash
 # revoke a permission from a role — effective immediately, same token

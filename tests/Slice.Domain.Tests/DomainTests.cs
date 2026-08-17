@@ -107,6 +107,11 @@ public class EnsureTests
         Assert.Throws<AppValidationException>(() => Ensure.Positive(0, "n"));
         Assert.Throws<AppValidationException>(() => Ensure.Range(5, 1, 3, "n"));
         Assert.Equal(2, Ensure.Positive(2, "n"));
+
+        // Returns the value, like every other guard here, so it reads as `Age = Ensure.Range(...)`.
+        Assert.Equal(2, Ensure.Range(2, 1, 3, "n"));
+        Assert.Equal(1, Ensure.Range(1, 1, 3, "n"));   // bounds are inclusive
+        Assert.Equal(3, Ensure.Range(3, 1, 3, "n"));
     }
 }
 

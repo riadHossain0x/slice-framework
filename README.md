@@ -288,8 +288,9 @@ are supported:
 ### Security: authentication, authorization & management
 
 [`Slice.Authentication`](src/Slice.Authentication/README.md) is an OpenIddict OAuth2/OIDC server with
-ASP.NET Identity (Guid keys), `/connect/token` (password + refresh grants, JWT access tokens), an
-`HttpCurrentUser`, and a seeded demo admin. [`Slice.Authorization`](src/Slice.Authorization/README.md)
+tenant-scoped ASP.NET Identity (Guid keys, `SliceUser`/`SliceRole` — the same email can exist once per
+tenant), `/connect/token` (password + refresh grants, JWT access tokens), an `HttpCurrentUser`, and a
+seeded demo admin. [`Slice.Authorization`](src/Slice.Authorization/README.md)
 adds permission definitions, `[SlicePermission]`, and the authorization behavior.
 
 Permissions are checked against an `IPermissionStore`, layered:

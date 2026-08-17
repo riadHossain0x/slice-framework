@@ -2,6 +2,7 @@
 
   <ItemGroup>
     <ProjectReference Include="..\Slice.Core\Slice.Core.csproj" />
+    <ProjectReference Include="..\Slice.Domain\Slice.Domain.csproj" />
     <ProjectReference Include="..\Slice.Mediator\Slice.Mediator.csproj" />
     <ProjectReference Include="..\Slice.Modularity\Slice.Modularity.csproj" />
     <ProjectReference Include="..\Slice.Application\Slice.Application.csproj" />

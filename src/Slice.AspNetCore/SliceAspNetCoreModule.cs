@@ -1,5 +1,6 @@
 using Microsoft.Extensions.DependencyInjection;
 using Slice.Application;
+using Slice.AspNetCore.Http;
 using Slice.Modularity;
 
 namespace Slice.AspNetCore;
@@ -15,5 +16,9 @@ public sealed class SliceAspNetCoreModule : SliceModule
     {
         context.Services.AddControllers();
         context.Services.AddProblemDetails();
+
+        // Plain Add, not TryAdd: a host replaces this by registering its own after the module, which
+        // is the framework's usual last-registration-wins seam. See ISliceProblemResponseWriter.
+        context.Services.AddSingleton<ISliceProblemResponseWriter, JsonProblemResponseWriter>();
     }
 }
